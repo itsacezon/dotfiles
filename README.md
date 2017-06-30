@@ -1,2 +1,5 @@
 # dotfiles
+
 Personal configurations
+
+[WIP]
