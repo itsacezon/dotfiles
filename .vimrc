@@ -29,6 +29,7 @@ syntax on
 
 " Ag
 let g:ackprg = 'ag --vimgrep'
+let $FZF_DEFAULT_COMMAND = 'ag -g ""'
 
 " Themes
 set background=dark
