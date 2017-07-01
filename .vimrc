@@ -22,6 +22,8 @@ Plug 'isRuslan/vim-es6'
 Plug 'slim-template/vim-slim', { 'for': 'slim' }
 Plug 'elixir-lang/vim-elixir'
 
+Plug 'dracula/vim', { 'as': 'dracula-vim'  }
+
 call plug#end()
 
 filetype indent on
@@ -34,7 +36,7 @@ let $FZF_DEFAULT_COMMAND = 'ag -g ""'
 " Themes
 set background=dark
 let g:enable_bold_font = 1
-color dracula
+colorscheme dracula
 
 " Lightline
 let g:lightline = { 'colorscheme': 'Dracula', }
