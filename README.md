@@ -1,5 +1,3 @@
 # dotfiles
 
-Personal configurations
-
-[WIP]
+Personal configurations. Will add further documentation.
