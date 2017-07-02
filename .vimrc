@@ -21,6 +21,7 @@ Plug 'hail2u/vim-css3-syntax', { 'for': ['scss', 'sass'] }
 Plug 'isRuslan/vim-es6'
 Plug 'slim-template/vim-slim', { 'for': 'slim' }
 Plug 'elixir-lang/vim-elixir'
+Plug 'digitaltoad/vim-pug'
 
 Plug 'dracula/vim', { 'as': 'dracula-vim'  }
 
@@ -39,7 +40,12 @@ let g:enable_bold_font = 1
 colorscheme dracula
 
 " Lightline
-let g:lightline = { 'colorscheme': 'Dracula', }
+let g:lightline = {
+  \ 'colorscheme': 'Dracula',
+  \ 'tab_component_function': {
+  \   'filename': 'CustomTabFilename',
+  \ },
+  \ }
 
 autocmd BufWritePre * :%s/\s\+$//e                 " Remove trailing whitespace
 autocmd BufWritePre * :%s/\($\n\s*\)\+\%$//e       " Remove newlines at the end of file
@@ -55,8 +61,9 @@ set showcmd                                        " This shows what you are typ
 set number                                         " Show line numbers
 set ruler                                          " Show current cursor position
 set list                                           " Show invisible characters
-set hlsearch                                       " Highlight search results
+set nohlsearch
 set clipboard=unnamed                              " Clipboard
+set breakindent
 
 " Commands
 let mapleader = ','
@@ -69,6 +76,12 @@ nnoremap <C-Left> <C-W><C-J>
 nnoremap <C-Up> <C-W><C-K>
 nnoremap <C-Right> <C-W><C-L>
 nnoremap <C-Down> <C-W><C-H>
+
+" Move through wrapped lines
+inoremap <silent> <Down> <C-o>gj
+inoremap <silent> <Up> <C-o>gk
+nnoremap <silent> <Down> gj
+nnoremap <silent> <Up> gk
 
 " Tab navigation like Firefox.
 nnoremap <C-S-tab> :tabprevious<CR>
@@ -142,3 +155,26 @@ autocmd BufNewFile,BufReadPost *.hamlbars set filetype=haml
 autocmd BufNewFile,BufReadPost *.hbs set filetype=html
 autocmd BufNewFile,BufReadPost *.md set filetype=markdown
 autocmd BufNewFile,BufReadPost Guardfile,Gemfile,Gemfile.lock set filetype=ruby
+
+function! CustomTabFilename(n)
+  let buflist = tabpagebuflist(a:n)
+  let winnr = tabpagewinnr(a:n)
+  let bufnum = buflist[winnr - 1]
+  let bufname = expand('#'.bufnum.':t')
+  let buffullname = expand('#'.bufnum.':p')
+  let buffullnames = []
+  let bufnames = []
+  for i in range(1, tabpagenr('$'))
+    if i != a:n
+      let num = tabpagebuflist(i)[tabpagewinnr(i) - 1]
+      call add(buffullnames, expand('#' . num . ':p'))
+      call add(bufnames, expand('#' . num . ':t'))
+    endif
+  endfor
+  let i = index(bufnames, bufname)
+  if strlen(bufname) && i >= 0 && buffullnames[i] != buffullname
+    return substitute(buffullname, '.*/\([^/]\+/\)', '\1', '')
+  else
+    return strlen(bufname) ? bufname : '[No Name]'
+  endif
+endfunction
