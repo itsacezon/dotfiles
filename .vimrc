@@ -10,6 +10,9 @@ set pyxversion=3
 
 call plug#begin('~/.vim/plugged')
 
+" Core
+Plug 'nvim-lua/plenary.nvim'
+
 " Colour scheme
 Plug 'folke/tokyonight.nvim'
 Plug 'gorodinskiy/vim-coloresque'
@@ -17,6 +20,7 @@ Plug 'gorodinskiy/vim-coloresque'
 " Quality-of-life
 Plug 'tpope/vim-sensible'
 Plug 'tpope/vim-obsession'
+Plug 'zegervdv/nrpattern.nvim'
 
 " Code formatting
 Plug 'cohama/lexima.vim'
@@ -40,14 +44,28 @@ Plug 'tpope/vim-vinegar'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
+" Tags, snippets
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'hrsh7th/vim-vsnip'
+
 " Syntax highlighting
 Plug 'nvim-treesitter/nvim-treesitter', { 'do': ':TSUpdate' }
 
-" Linting, tags, auto-completion
+" LSP
+Plug 'neovim/nvim-lspconfig'
+Plug 'pmizio/typescript-tools.nvim'
+
+" Linting
 Plug 'dense-analysis/ale'
-Plug 'ludovicchabant/vim-gutentags'
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'zegervdv/nrpattern.nvim'
+
+" Auto-completion
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/cmp-cmdline'
+Plug 'delphinus/cmp-ctags'
+Plug 'hrsh7th/cmp-vsnip'
+Plug 'hrsh7th/nvim-cmp'
 
 call plug#end()
 
@@ -61,7 +79,6 @@ let g:netrw_banner = 0
 " Better copy command
 let g:netrw_localcopydircmd = 'cp -r'
 " Sync current directory and browsing directory
-" let g:netrw_keepdir = 0
 let g:netrw_fastbrowse = 0
 let g:netrw_browse_split = 2
 let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
@@ -69,7 +86,6 @@ let g:netrw_bufsettings = 'noma nomod nu nobl nowrap ro'
 " fzf
 let $FZF_DEFAULT_COMMAND = 'rg --files'
 let g:fzf_layout = { 'window': { 'width': 0.8, 'height': 0.5, 'highlight': 'Comment' } }
-" let g:fzf_layout = { 'down': '~40%' }
 let g:fzf_colors = {
   \ 'fg+': ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
   \ 'bg+': ['bg', 'CursorLine', 'CursorColumn']
@@ -87,57 +103,49 @@ autocmd! FileType fzf
 autocmd  FileType fzf set laststatus=0 noshowmode noruler
   \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
 
-autocmd BufRead,BufNewFile *.nadel set filetype=graphql
+augroup SyntaxSettings
+    autocmd!
+    autocmd BufRead,BufNewFile *.nadel set filetype=graphql
+augroup END
 
 " vim-gutentags
 let s:tags_cache = expand('~/.cache/nvim/ctags')
 let g:gutentags_cache_dir = s:tags_cache
-let g:gutentags_file_list_command = $FZF_DEFAULT_COMMAND
-let g:gutentags_ctags_extra_args = ['--exclude=.git', '--tag-relative=yes', '--fields=+ailmnS']
-set wildignore+=*node_modules*
-
-" vim-gutentags -- only run for node projects
+let g:gutentags_file_list_command = 'git ls-files'
+let g:gutentags_define_advanced_commands = 1
 let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = ['package.json', '.git']
+let g:gutentags_ctags_exclude = ['*.git', 'node_modules']
+let g:gutentags_ctags_extra_args = [
+  \ '--tag-relative=yes',
+  \ '--fields=+ailmnS',
+  \ '--kinds-TypeScript=+lz'
+  \ ]
 
-" Eslint/Typescript
+" Linting
 let g:ale_fixers = {
-  \ 'javascript': ['prettier', 'eslint'],
   \ 'typescript': ['prettier', 'eslint'],
   \ 'typescriptreact': ['prettier', 'eslint'],
   \ }
 let g:ale_linters = {
-  \ 'javascript': ['eslint'],
-  \ 'typescript': ['eslint', 'tsserver'],
-  \ 'typescriptreact': ['eslint', 'tsserver'],
-  \}
-let g:ale_sign_error = '❌'
-let g:ale_sign_warning = '⚠️'
-let g:ale_sign_info = "ℹ️"
-let g:ale_fix_on_save = 1
-let g:ale_sign_column_always = 1
-let g:ale_completion_autoimport = 1
+  \ 'typescript': ['eslint'],
+  \ 'typescriptreact': ['eslint'],
+  \ }
 let g:ale_linters_explicit = 1
+
+let g:ale_disable_lsp = 1
+let g:ale_use_neovim_diagnostics_api = 1
+
+let g:ale_completion_autoimport = 0
+let g:ale_default_navigation = 'vsplit'
+let g:ale_fix_on_save = 1
+
 let g:ale_set_balloons = 1
-let g:ale_hover_cursor = 1
-let g:ale_hover_to_preview = 0
 let g:ale_hover_to_floating_preview = 1
-let g:ale_detail_to_floating_preview = 0
-let g:ale_use_global_executables = 0
-let g:ale_javascript_ = 1
-let g:ale_javascript_prettier_use_local_config = 1
-let g:ale_cursor_detail = 0
+let g:ale_detail_to_floating_preview = 1
 let g:ale_close_preview_on_insert = 1
 let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰']
-let g:ale_virtualtext_cursor = 'current'
-let g:ale_sign_highlight_linenrs = 1
-
-" Float preview
-let g:float_preview#docked = 0
-
-" Deoplete
-let g:deoplete#enable_at_startup = 1
-call deoplete#custom#option('sources', {'_': ['ale']})
+let g:ale_virtualtext_cursor = 'disabled'
 
 " Themes
 set termguicolors
@@ -156,11 +164,6 @@ let &t_Ce = "\e[4:0m"
 
 let &t_ut = ''
 
-" highlight Normal guibg=NONE ctermbg=NONE
-" highlight Whitespace ctermfg=grey guifg=grey20
-" highlight SpecialKey ctermfg=grey guifg=grey20
-" highlight CursorLine guibg=#283457
-" highlight CursorLineNR guifg=#c0caf5
 highlight ALEWarning guisp=yellow gui=undercurl guifg=NONE guibg=NONE
     \ ctermfg=NONE ctermbg=NONE term=underline cterm=undercurl
 highlight ALEError guisp=red gui=undercurl guifg=NONE guibg=NONE
@@ -171,6 +174,7 @@ let g:lightline = {
   \ 'colorscheme': 'tokyonight',
   \ 'component_function': {
   \   'filename': 'LightlineFilename',
+  \   'gutentags': 'gutentags#statusline',
   \ },
   \ 'tab_component_function': {
   \   'filename': 'CustomTabFilename',
@@ -244,13 +248,8 @@ nnoremap q <C-r>
 nnoremap <expr> <Down> v:count == 0 ? 'gj' : "\<Esc>".v:count.'j'
 nnoremap <expr> <Up> v:count == 0 ? 'gk' : "\<Esc>".v:count.'k'
 
-" Tab navigation like Firefox.
-nnoremap <C-S-tab> :tabprevious<CR>
-nnoremap <C-tab>   :tabnext<CR>
+" Quickly create a new tab
 nnoremap <C-t>     :tabnew<CR>
-inoremap <C-S-tab> <Esc>:tabprevious<CR>i
-inoremap <C-tab>   <Esc>:tabnext<CR>i
-inoremap <C-t>     <Esc>:tabnew<CR>
 
 " Add semicolon
 inoremap <leader>; <C-o>A;
@@ -311,12 +310,13 @@ inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
 " vim-fugitive
 nnoremap :gw :Gwrite
 
-" ALE mappings
-nnoremap K :ALEHover<CR>
-nnoremap L :ALEDetail<CR>
-nnoremap <silent> gr :ALEFindReferences<CR>
-autocmd FileType typescriptreact map <buffer> ] :ALEGoToDefinition<CR>
-autocmd FileType typescriptreact map <buffer> <c-]> :ALEGoToDefinition -vsplit<CR>
+augroup typescript_mappings
+    autocmd!
+    autocmd FileType typescript nmap <silent> gd <Plug>(ale_go_to_definition)
+    autocmd FileType typescript nmap <silent> gy <Plug>(ale_go_to_type_definition)
+    autocmd FileType typescript nmap <silent> gi <Plug>(ale_go_to_implementation)
+    autocmd FileType typescript nmap <silent> gr <Plug>(ale_find_references)
+augroup END
 
 " Auto line numbering
 set number relativenumber
@@ -396,4 +396,10 @@ augroup netrw_mapping
     autocmd!
     autocmd FileType netrw call NetrwMapping()
     autocmd FileType netrw setlocal bufhidden=wipe
+augroup END
+
+augroup GutentagsStatusLineRefresher
+    autocmd!
+    autocmd User GutentagsUpdating call lightline#update()
+    autocmd User GutentagsUpdated call lightline#update()
 augroup END
