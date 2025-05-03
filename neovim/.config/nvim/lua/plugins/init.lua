@@ -5,7 +5,7 @@ return {
     -- Custom utilities
     {
         name = 'utils',
-        dir = '~/.config/nvim/lua',
+        dir = vim.fn.stdpath('config') .. '/lua',
     },
 
     --  Colour scheme
