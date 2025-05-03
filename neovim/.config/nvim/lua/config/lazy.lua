@@ -14,5 +14,12 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Use the `plugins` folder
-require('lazy').setup('plugins')
+require('lazy').setup({
+    spec = {
+        -- Use the `plugins` folder
+        { import  = 'plugins' }
+    },
+    ui = { border = 'rounded' },
+    install = { colorscheme = { 'tokyonight' } },
+    checker = { enabled = true },
+})
