@@ -1,11 +1,3 @@
-local function close_all_floats()
-    for _, win in ipairs(vim.api.nvim_list_wins()) do
-        if vim.api.nvim_win_get_config(win).relative ~= '' then
-            vim.api.nvim_win_close(win, true)
-        end
-    end
-end
-
 local function lsp_split_to(command)
     return function()
         vim.cmd.vsplit()
@@ -23,31 +15,6 @@ local function format_ts_error(diagnostic)
         diagnostic.source,
         diagnostic.code or diagnostic.user_data.lsp.code
     )
-end
-
-local function open_diagnostic_float()
-    close_all_floats()
-
-    -- Limit diagnostic to cursor
-    local pos = vim.api.nvim_win_get_cursor(0)
-    local diagnostics = vim.diagnostic.get(0, { lnum = pos[1] - 1 })
-
-    diagnostics = vim.tbl_filter(function(diagnostic)
-        return pos[2] < diagnostic.end_col
-    end, diagnostics)
-
-    if vim.tbl_isempty(diagnostics) then return end
-
-    local lines = {}
-    for i, diagnostic in ipairs(diagnostics) do
-        table.insert(lines, format_ts_error(diagnostic))
-    end
-
-    local float_bufnr, winnr = vim.lsp.util.open_floating_preview(lines, 'markdown', {
-        border = 'rounded',
-        focus_id = 'cursor',
-    })
-    vim.bo[float_bufnr].path = vim.bo[0].path
 end
 
 local function open_pretty_hover()
@@ -116,9 +83,6 @@ return {
                 require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
             end,
             handlers = {
-                ['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
-                    border = 'rounded',
-                }),
                 ['textDocument/publishDiagnostics'] = function(_, result, ctx, config)
                     if result.diagnostics == nil then return end
 
@@ -175,8 +139,88 @@ return {
 
             vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
             vim.keymap.set('n', 'gr', api.file_references)
-            vim.keymap.set('n', 'K', open_pretty_hover)
+            -- vim.keymap.set('n', 'K', open_pretty_hover)
+            vim.keymap.set('n', 'K', vim.lsp.buf.hover)
             vim.keymap.set('n', 'L', '<Cmd>Trouble diagnostics_buffer toggle<CR>')
         end,
+    },
+
+    {
+        'mfussenegger/nvim-lint',
+        opts = {
+            events = { 'BufWritePost', 'InsertLeave' },
+            linters_by_ft = {},
+            linters = {},
+        },
+        config = function(_, opts)
+            local lint = require('lint')
+
+            for name, linter in pairs(opts.linters) do
+                if type(linter) == 'table' and type(lint.linters[name]) == 'table' then
+                    lint.linters[name] = vim.tbl_deep_extend('force', lint.linters[name], linter)
+                else
+                    lint.linters[name] = linter
+                end
+            end
+
+            lint.linters_by_ft = opts.linters_by_ft
+
+            local function try_lint(event)
+                local names = lint._resolve_linter_by_ft(vim.bo.filetype)
+
+                for _, name in ipairs(names) do
+                    local linter = lint.linters[name]
+
+                    if linter then
+                        -- Allow `cwd` to take a function
+                        if type(linter.cwd) == 'function' then
+                            linter.cwd = linter.cwd(event.buf)
+                        end
+
+                        local ctx = { cwd = linter.cwd or vim.fn.getcwd() }
+
+                        -- Pass context to `cmd`
+                        if type(linter.cmd) == 'function' then
+                            linter.cmd = linter.cmd(event.buf, ctx)
+                        end
+                    end
+                end
+
+                lint.try_lint(names)
+            end
+
+            vim.api.nvim_create_autocmd(opts.events, {
+                callback = try_lint,
+            })
+        end,
+    },
+
+    {
+        'stevearc/conform.nvim',
+        events = { 'BufWritePost', 'InsertLeave' },
+        opts = {
+            formatters_by_ft = {
+                json = { 'prettier' },
+                svg = { 'svgo' },
+                typescript = { 'prettier' },
+                typescriptreact = { 'prettier' },
+            },
+            format_on_save = {
+                timeout_ms = 500,
+                lsp_fallback = true,
+            },
+            formatters = {
+                svgo = {
+                    command = 'svgo',
+                    args = { '-i', '-', '-o', '-' },
+                    stdin = true,
+                    -- cwd = require('conform.util').root_file({ 'package.json' }),
+                    -- condition = function(self, ctx)
+                    --     local buf_lang = vim.bo[ctx.buf].filetype
+                    --     return buf_lang == 'svg'
+                    -- end,
+                },
+            },
+        },
     },
 }

@@ -44,7 +44,6 @@ vim.opt.clipboard = 'unnamed'
 vim.opt.mouse = 'a'
 
 -- UI settings
--- vim.opt.hlsearch = false
 vim.opt.laststatus = 3
 vim.opt.scrolloff = 10
 vim.opt.showmode = false
@@ -76,7 +75,7 @@ local keymap_set = vim.keymap.set
 ---@diagnostic disable-next-line: duplicate-set-field
 vim.keymap.set = function(mode, lhs, rhs, opts)
     opts = opts or {}
-    opts.silent = opts.silent ~= false -- Always true
+    opts.silent = opts.silent ~= false   -- Always true
     opts.noremap = opts.noremap ~= false -- Always true
     return keymap_set(mode, lhs, rhs, opts)
 end
@@ -84,11 +83,65 @@ end
 -- Load plugins
 require('config.lazy')
 
+-- LSPs
+vim.lsp.config.lua_ls = {
+    settings = {
+        Lua = {
+            runtime = {
+                version = 'LuaJIT',
+                path = {
+                    'lua/?.lua',
+                    'lua/?/init.lua',
+                },
+            },
+            workspace = {
+                checkThirdParty = false,
+                library = {
+                    vim.env.VIMRUNTIME,
+                    '${3rd}/luv/library',
+                    -- '${3rd}/busted/library',
+                },
+            },
+            hover = { expandAlias = false },
+            type = {
+                castNumberToInteger = true,
+                inferParamType = true,
+            },
+            diagnostics = {
+                disable = { 'incomplete-signature-doc', 'trailing-space' },
+                groupSeverity = {
+                    strong = 'Warning',
+                    strict = 'Warning',
+                },
+                groupFileStatus = {
+                    ['ambiguity'] = 'Opened',
+                    ['await'] = 'Opened',
+                    ['codestyle'] = 'None',
+                    ['duplicate'] = 'Opened',
+                    ['global'] = 'Opened',
+                    ['luadoc'] = 'Opened',
+                    ['redefined'] = 'Opened',
+                    ['strict'] = 'Opened',
+                    ['strong'] = 'Opened',
+                    ['type-check'] = 'Opened',
+                    ['unbalanced'] = 'Opened',
+                    ['unused'] = 'Opened',
+                },
+                unusedLocalExclude = { '_*' },
+            },
+        },
+    },
+}
+
+vim.lsp.enable({ 'lua_ls' })
+vim.o.winborder = 'rounded'
+
 -- Autocommands
 local au = require('autocmd')
 
 -- Window autocommands
-local window = au({ 'user_window',
+local window = au({
+    'user_window',
     pattern = '*',
     Resize = { 'BufWinEnter', 'VimResized' },
 })
@@ -126,7 +179,8 @@ function yank.TextYankPost()
 end
 
 -- Automatically toggle between absolute/relative line numbering
-local number = au({ 'user_number',
+local number = au({
+    'user_number',
     Relative = { 'BufEnter', 'FocusGained', 'InsertLeave', 'TermLeave', 'WinEnter' },
     Absolute = { 'BufLeave', 'FocusLost', 'InsertEnter', 'TermEnter', 'WinLeave' },
 })
@@ -154,9 +208,6 @@ function dir.BufWritePre(event)
     vim.fn.mkdir(vim.fn.fnamemodify(file, ':p:h'), 'p')
 end
 
--- Custom key mappings
-local map, opts = vim.keymap.set, { noremap = true, silent = true }
-
 -- Clear search highlight
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
 
@@ -169,10 +220,10 @@ vim.keymap.set('n', '<Down>', 'v:count == 0 ? "gj" : "\\<Esc>".v:count."j"', { e
 vim.keymap.set('n', '<Up>', 'v:count == 0 ? "gk" : "\\<Esc>".v:count."k"', { expr = true })
 
 -- Get filepaths
-vim.keymap.set('n', '<Leader>cf', '<Cmd>let @*=expand("%")<CR>') -- Relative path
-vim.keymap.set('n', '<Leader>cF', '<Cmd>let @*=expand("%:p")<CR>') -- Absolute path
-vim.keymap.set('n', '<Leader>ct', '<Cmd>let @*=expand("%:t")<CR>') -- Just the filename
-vim.keymap.set('n', '<Leader>ch', '<Cmd>let @*=expand("%:h")<CR>') -- Relative directory
+vim.keymap.set('n', '<Leader>cf', '<Cmd>let @*=expand("%")<CR>')     -- Relative path
+vim.keymap.set('n', '<Leader>cF', '<Cmd>let @*=expand("%:p")<CR>')   -- Absolute path
+vim.keymap.set('n', '<Leader>ct', '<Cmd>let @*=expand("%:t")<CR>')   -- Just the filename
+vim.keymap.set('n', '<Leader>ch', '<Cmd>let @*=expand("%:h")<CR>')   -- Relative directory
 vim.keymap.set('n', '<Leader>cH', '<Cmd>let @*=expand("%:p:h")<CR>') -- Absolute directory
 
 -- Splits / tabs
