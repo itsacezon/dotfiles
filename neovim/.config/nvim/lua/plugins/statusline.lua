@@ -1,5 +1,5 @@
 local function format_winbar(fname, context)
-    local metadata = require('utils').get_file_metadata(vim.api.nvim_buf_get_name(0))
+    local metadata = require('utils').get_file_metadata(vim.api.nvim_get_current_buf())
 
     if metadata.package_name ~= nil then
         return metadata.relative_path .. (vim.bo.modified and ' [+]' or '')
