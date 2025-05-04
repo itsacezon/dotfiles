@@ -92,7 +92,12 @@ return {
                 end
             },
             root_dir = function(_, bufnr)
-                return require('utils').root_dir_from_pattern(bufnr, 'package.json')
+                return require('utils').root_dir_from_pattern(bufnr, {
+                    'yarn.lock',
+                    'tsconfig.json',
+                    'package.json',
+                    '.git',
+                })
             end,
             filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
             settings = {
@@ -220,6 +225,20 @@ return {
                     --     return buf_lang == 'svg'
                     -- end,
                 },
+            },
+        },
+    },
+
+
+    -- For Neovim configs
+    {
+        'folke/lazydev.nvim',
+        ft = 'lua',
+        opts = {
+            library = {
+                'lazy.nvim',
+                -- Load luvit types when the `vim.uv` word is found
+                { path = "${3rd}/luv/library", words = { "vim%.uv" } },
             },
         },
     },

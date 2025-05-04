@@ -84,55 +84,6 @@ end
 require('config.lazy')
 
 -- LSPs
-vim.lsp.config.lua_ls = {
-    settings = {
-        Lua = {
-            runtime = {
-                version = 'LuaJIT',
-                path = {
-                    'lua/?.lua',
-                    'lua/?/init.lua',
-                },
-            },
-            workspace = {
-                checkThirdParty = false,
-                library = {
-                    vim.env.VIMRUNTIME,
-                    '${3rd}/luv/library',
-                    -- '${3rd}/busted/library',
-                },
-            },
-            hover = { expandAlias = false },
-            type = {
-                castNumberToInteger = true,
-                inferParamType = true,
-            },
-            diagnostics = {
-                disable = { 'incomplete-signature-doc', 'trailing-space' },
-                groupSeverity = {
-                    strong = 'Warning',
-                    strict = 'Warning',
-                },
-                groupFileStatus = {
-                    ['ambiguity'] = 'Opened',
-                    ['await'] = 'Opened',
-                    ['codestyle'] = 'None',
-                    ['duplicate'] = 'Opened',
-                    ['global'] = 'Opened',
-                    ['luadoc'] = 'Opened',
-                    ['redefined'] = 'Opened',
-                    ['strict'] = 'Opened',
-                    ['strong'] = 'Opened',
-                    ['type-check'] = 'Opened',
-                    ['unbalanced'] = 'Opened',
-                    ['unused'] = 'Opened',
-                },
-                unusedLocalExclude = { '_*' },
-            },
-        },
-    },
-}
-
 vim.lsp.enable({ 'lua_ls' })
 vim.o.winborder = 'rounded'
 

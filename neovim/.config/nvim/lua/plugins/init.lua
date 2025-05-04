@@ -33,90 +33,17 @@ return {
         opts = {},
     },
 
-    --  File browser
-    'tpope/vim-eunuch',
-    'tpope/vim-vinegar',
+    --  Syntax highlighting
     {
-        'stevearc/oil.nvim',
-        dependencies = {
-            { 'echasnovski/mini.icons', opts = {} },
-            'folke/snacks.nvim',
-        },
+        'nvim-treesitter/nvim-treesitter',
+        build = ':TSUpdate',
         opts = {
-            float = {
-                max_width = 120,
-                max_height = 40,
-            },
-            keymaps = {
-                ['<Leader>v'] = '<Cmd>q<CR>',
-                ['<Space>'] = function()
-                    local util = require('oil.util')
-                    local entry = require('oil').get_cursor_entry()
-
-                    if entry and entry.type == 'file' then
-                        util.get_edit_path(0, entry, function(url)
-                            vim.fn.system({ 'qlmanage', '-p', url })
-                        end)
-                    end
-                end,
-            },
-            view_options = {
-                show_hidden = true,
-            },
+            auto_install = true,
+            highlight = { enable = true },
         },
         config = function(_, opts)
-            require('oil').setup(opts);
-
-            -- Set autocommands
-            vim.api.nvim_create_autocmd('User', {
-                pattern = 'OilActionsPost',
-                callback = function(event)
-                    if event.data.actions.type == 'move' then
-                        Snacks.rename.on_rename_file(event.data.actions.src_url, event.data.actions.dest_url)
-                    end
-                end,
-            })
-
-            -- Set keymaps
-            vim.keymap.set('', '<Leader>v', '<Cmd>vsplit | Oil<CR>')
+            require('nvim-treesitter.configs').setup(opts)
         end,
-    },
-
-    --  Fuzzy file searching
-    {
-        'junegunn/fzf',
-        build = './install --bin',
-    },
-    {
-        'ibhagwan/fzf-lua',
-        branch = 'main',
-        opts = {
-            'fzf-vim',
-            grep = {
-                rg_glob = true,
-            },
-            winopts = {
-                height = 0.6,
-                width = 0.8,
-                preview = {
-                    hidden = 'nohidden',
-                    horizontal = 'right:50%',
-                    { default = 'bat' },
-                },
-                on_close = function()
-                    -- Make lualine return to normal mode immediately
-                    vim.api.nvim_input('<Ignore>')
-                end,
-            },
-            defaults = {
-                git_icons = false,
-                file_icons = false,
-            },
-        },
-        keys = {
-            { '<Leader><Space>', '<Cmd>lua require("fzf-lua").grep({ search = "" })<CR>' },
-            { '<C-p>',           '<Cmd>FzfLua files multiline=1<CR>' },
-        },
     },
 
     --  Quality-of-life
@@ -133,6 +60,7 @@ return {
         'folke/snacks.nvim',
         priority = 1000,
         lazy = false,
+        ---@type snacks.Config
         opts = {
             bigfile = { enabled = true },
             dashboard = { enabled = false },
@@ -182,17 +110,95 @@ return {
         },
     },
 
-    --  Syntax highlighting
+    --  File browser
     {
-        'nvim-treesitter/nvim-treesitter',
-        build = ':TSUpdate',
+        'stevearc/oil.nvim',
+        dependencies = {
+            { 'echasnovski/mini.icons', opts = {} },
+            'folke/snacks.nvim',
+        },
         opts = {
-            auto_install = true,
-            highlight = { enable = true },
+            keymaps = {
+                ['<Leader>v'] = '<Cmd>q<CR>',
+                ['<Space>'] = function()
+                    local util = require('oil.util')
+                    local entry = require('oil').get_cursor_entry()
+
+                    if entry and entry.type == 'file' then
+                        util.get_edit_path(0, entry, function(url)
+                            vim.fn.system({ 'qlmanage', '-p', url })
+                        end)
+                    end
+                end,
+            },
+            delete_to_trash = true,
+            view_options = {
+                show_hidden = true,
+            },
         },
         config = function(_, opts)
-            require('nvim-treesitter.configs').setup(opts)
+            require('oil').setup(opts);
+
+            -- Set autocommands
+            vim.api.nvim_create_autocmd('User', {
+                pattern = 'OilActionsPost',
+                callback = function(event)
+                    if event.data.actions.type == 'move' then
+                        Snacks.rename.on_rename_file(event.data.actions.src_url, event.data.actions.dest_url)
+                    end
+                end,
+            })
+
+            -- Set keymaps
+            vim.keymap.set('', '<Leader>v', '<Cmd>vsplit | Oil<CR>')
+            vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
         end,
+    },
+
+    --  Fuzzy file searching
+    {
+        'junegunn/fzf',
+        build = './install --bin',
+    },
+    {
+        'ibhagwan/fzf-lua',
+        branch = 'main',
+        dependencies = {
+            { 'echasnovski/mini.icons', opts = {} },
+        },
+        opts = {
+            defaults = {
+                file_icons = 'mini',
+                git_icons = false,
+            },
+            files = {
+                prompt = '❯ ',
+                cwd_header = true,
+                cwd_prompt = false,
+            },
+            grep = {
+                prompt = '❯ ',
+                hidden = true,
+                rg_glob = true,
+            },
+            winopts = {
+                height = 0.6,
+                width = 0.8,
+                preview = {
+                    horizontal = 'right:40%',
+                },
+                on_close = function()
+                    -- Make lualine return to normal mode immediately
+                    vim.api.nvim_input('<Ignore>')
+                end,
+            },
+        },
+        keys = {
+            -- Use `rg`
+            { '<Leader><Space>', '<Cmd>FzfLua live_grep_glob<CR>' },
+            -- Use `fd`
+            { '<C-p>',           '<Cmd>FzfLua files<CR>' },
+        },
     },
 
     -- Formatting

@@ -2,27 +2,38 @@ local vim = vim -- Prevents undefined vim if overridden somewhere else
 
 local M = {}
 
+---@param bufnr integer
+---@return integer
 function M.get_bufnr(bufnr)
     return type(bufnr) == 'number' and bufnr or vim.api.nvim_get_current_buf()
 end
 
+---@param bufnr integer
+---@return string
 function M.get_current_path(bufnr)
     return vim.api.nvim_buf_get_name(M.get_bufnr(bufnr))
 end
 
-function M.root_dir_from_pattern(bufnr, pattern)
-    local root_dir = vim.fs.root(M.get_bufnr(bufnr), pattern)
-    return root_dir or vim.loop.cwd()
+---@param bufnr integer
+---@param patterns string[]
+---@param fallback string?
+---@return string | nil
+function M.root_dir_from_pattern(bufnr, patterns, fallback)
+    local root_dir = fallback or vim.loop.cwd()
+
+    for _, pattern in pairs(patterns) do
+        local found_root_dir = vim.fs.root(M.get_bufnr(bufnr), pattern)
+
+        if found_root_dir then
+            root_dir = found_root_dir
+            break
+        end
+    end
+
+    return root_dir
 end
 
-function M.yarn_lock_root_dir(bufnr)
-    return M.root_dir_from_pattern(bufnr, 'yarn.lock')
-end
-
-function M.tsconfig_root_dir(bufnr)
-    return M.root_dir_from_pattern(bufnr, 'tsconfig.json')
-end
-
+---@param bufnr integer
 function M.get_file_metadata(bufnr)
     local package_json = 'package.json'
     local path = M.get_current_path(bufnr)

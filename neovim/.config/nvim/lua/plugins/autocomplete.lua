@@ -42,6 +42,17 @@ return {
                 completion = { menu = { auto_show = true } },
             },
             fuzzy = { implementation = 'prefer_rust_with_warning' },
+            sources = {
+                per_filetype = {
+                    lua = { inherit_defaults = true, 'lazydev' },
+                },
+                providers = {
+                    lazydev = {
+                        name = 'LazyDev',
+                        module = 'lazydev.integrations.blink',
+                    },
+                },
+            },
         },
         opts_extend = { 'sources.default' },
     },
