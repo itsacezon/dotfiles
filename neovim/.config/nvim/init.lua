@@ -3,7 +3,7 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 -- Tabs / spaces
-vim.opt.smarttab = false
+-- vim.opt.smarttab = false
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
@@ -38,6 +38,7 @@ vim.opt.completeopt = 'menu'
 -- Show line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
+-- vim.opt.statuscolumn = '%{v:relnum?v:relnum:v:lnum} %s %C'
 
 -- Mouse / clipboard
 vim.opt.clipboard = 'unnamed'
@@ -47,6 +48,8 @@ vim.opt.mouse = 'a'
 vim.opt.laststatus = 3
 vim.opt.scrolloff = 10
 vim.opt.showmode = false
+vim.opt.sidescrolloff = 8
+vim.opt.signcolumn = 'yes'
 vim.opt.splitright = true
 vim.opt.termguicolors = true
 vim.opt.virtualedit = 'block'
@@ -129,25 +132,6 @@ function yank.TextYankPost()
     vim.highlight.on_yank({ timeout = 200 })
 end
 
--- Automatically toggle between absolute/relative line numbering
-local number = au({
-    'user_number',
-    Relative = { 'BufEnter', 'FocusGained', 'InsertLeave', 'TermLeave', 'WinEnter' },
-    Absolute = { 'BufLeave', 'FocusLost', 'InsertEnter', 'TermEnter', 'WinLeave' },
-})
-
-function number.Relative()
-    if vim.opt_local.number:get() and vim.fn.mode() ~= 'i' then
-        vim.opt_local.relativenumber = true
-    end
-end
-
-function number.Absolute()
-    if vim.opt_local.number:get() then
-        vim.opt_local.relativenumber = false
-    end
-end
-
 -- Automatically create missing directories
 local dir = au('user_directories')
 function dir.BufWritePre(event)
@@ -179,9 +163,10 @@ vim.keymap.set('n', '<Leader>cH', '<Cmd>let @*=expand("%:p:h")<CR>') -- Absolute
 
 -- Splits / tabs
 vim.keymap.set('', '<Leader>,', '<C-w>=')
-vim.keymap.set('', '<Tab>', '<C-w>w')
-vim.keymap.set('', '\\', '<Cmd>vnew<CR>')
-vim.keymap.set('', '<Leader>\\', '<Cmd>vsplit<CR>')
+vim.keymap.set('n', '<Tab>', '<C-w>w')
+vim.keymap.set('n', '<Shift><Tab>', '<C-w>p')
+vim.keymap.set('n', '\\', '<Cmd>vnew<CR>')
+vim.keymap.set('n', '<Leader>\\', '<Cmd>vsplit<CR>')
 vim.keymap.set('n', '<C-t>', '<Cmd>tabnew<CR>')
 
 -- Better redo

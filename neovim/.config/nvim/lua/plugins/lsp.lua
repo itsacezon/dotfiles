@@ -17,10 +17,6 @@ local function format_ts_error(diagnostic)
     )
 end
 
-local function open_pretty_hover()
-    require('pretty_hover').hover()
-end
-
 return {
     'neovim/nvim-lspconfig',
 
@@ -79,9 +75,9 @@ return {
             },
         },
         opts = {
-            on_attach = function(client, bufnr)
-                require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
-            end,
+            -- on_attach = function(client, bufnr)
+            --     require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
+            -- end,
             handlers = {
                 ['textDocument/publishDiagnostics'] = function(_, result, ctx, config)
                     if result.diagnostics == nil then return end
@@ -92,12 +88,7 @@ return {
                 end
             },
             root_dir = function(_, bufnr)
-                return require('utils').root_dir_from_pattern(bufnr, {
-                    'yarn.lock',
-                    'tsconfig.json',
-                    'package.json',
-                    '.git',
-                })
+                return require('utils').root_dir(bufnr)
             end,
             filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
             settings = {
@@ -144,18 +135,32 @@ return {
 
             vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
             vim.keymap.set('n', 'gr', api.file_references)
-            -- vim.keymap.set('n', 'K', open_pretty_hover)
-            vim.keymap.set('n', 'K', vim.lsp.buf.hover)
+            vim.keymap.set('n', 'K', require('pretty_hover').hover)
+            -- vim.keymap.set('n', 'K', vim.lsp.buf.hover)
             vim.keymap.set('n', 'L', '<Cmd>Trouble diagnostics_buffer toggle<CR>')
         end,
     },
 
     {
         'mfussenegger/nvim-lint',
+        dependencies = { 'utils' },
         opts = {
             events = { 'BufWritePost', 'InsertLeave' },
-            linters_by_ft = {},
-            linters = {},
+            linters_by_ft = {
+                typescript = { 'eslint' },
+                typescriptreact = { 'eslint' },
+            },
+            linters = {
+                eslint = {
+                    cmd = function(_, ctx)
+                        local local_binary = vim.fn.fnamemodify(ctx.cwd .. '/node_modules/.bin/eslint', ':p')
+                        return vim.uv.fs_stat(local_binary) and local_binary or 'eslint'
+                    end,
+                    cwd = function(bufnr)
+                        return require('utils').root_dir(bufnr)
+                    end,
+                },
+            },
         },
         config = function(_, opts)
             local lint = require('lint')

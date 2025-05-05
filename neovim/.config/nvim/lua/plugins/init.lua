@@ -46,6 +46,38 @@ return {
         end,
     },
 
+    -- Git
+    {
+        'tpope/vim-fugitive',
+        keys = {
+            { 'gw', '<Cmd>Gwrite<CR>',    mode = 'n', noremap = true },
+            { 'gb', '<Cmd>Git blame<CR>', mode = 'n', noremap = true },
+        },
+    },
+    {
+        'lewis6991/gitsigns.nvim',
+        event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
+        dependencies = { 'nvim-lua/plenary.nvim' },
+        opts = {
+            numhl = false,
+            signs = {
+                add = { text = '▎' },
+                change = { text = '▎' },
+                delete = { text = '' },
+                topdelete = { text = '' },
+                changedelete = { text = '▎' },
+                untracked = { text = '▎' },
+            },
+            signs_staged = {
+                add = { text = '▎' },
+                change = { text = '▎' },
+                delete = { text = '' },
+                topdelete = { text = '' },
+                changedelete = { text = '▎' },
+            },
+        },
+    },
+
     --  Quality-of-life
     'tpope/vim-obsession',
     {
@@ -54,6 +86,13 @@ return {
         event = 'VeryLazy',
         opts = {
             autoresize = { enable = false },
+            ui = {
+                number = true,
+                relativenumber = true,
+                hybridnumber = true,
+                absolutenumber_unfocussed = true,
+                signcolumn = false,
+            },
         },
     },
     {
@@ -68,21 +107,32 @@ return {
             image = { enabled = false },
             indent = {
                 enabled = true,
-                char = '▏',
                 animate = { enabled = false },
+                indent = {
+                    char = '▏',
+                },
+                scope = {
+                    char = '▏',
+                    only_current = true,
+                    hl = 'Directory',
+                },
             },
             input = { enabled = true },
             notifier = { enabled = true },
             picker = { enabled = false },
             quickfile = { enabled = true },
-            scope = { enabled = true },
+            scope = { enabled = false },
             scroll = {
                 enabled = true,
                 animate = {
                     duration = { step = 10 },
                 },
             },
-            statuscolumn = { enabled = true },
+            statuscolumn = {
+                enabled = true,
+                left = { 'git', 'fold' },
+                right = { 'mark', 'sign' },
+            },
             words = { enabled = true },
         },
         keys = {
@@ -94,11 +144,7 @@ return {
     {
         'folke/which-key.nvim',
         event = 'VeryLazy',
-        opts = {
-            -- your configuration comes here
-            -- or leave it empty to use the default settings
-            -- refer to the configuration section below
-        },
+        opts = {},
         keys = {
             {
                 '<Leader>?',
@@ -208,6 +254,7 @@ return {
         config = true,
     },
 
+    -- Commenting
     {
         'JoosepAlviste/nvim-ts-context-commentstring',
         opts = {
@@ -222,37 +269,5 @@ return {
                 pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
             })
         end,
-    },
-
-    -- Git
-    {
-        'tpope/vim-fugitive',
-        keys = {
-            { 'gw', '<Cmd>Gwrite<CR>',    mode = 'n', noremap = true },
-            { 'gb', '<Cmd>Git blame<CR>', mode = 'n', noremap = true },
-        },
-    },
-    {
-        'lewis6991/gitsigns.nvim',
-        event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
-        dependencies = { 'nvim-lua/plenary.nvim' },
-        opts = {
-            numhl = false,
-            signs = {
-                add = { text = '▎' },
-                change = { text = '▎' },
-                delete = { text = '' },
-                topdelete = { text = '' },
-                changedelete = { text = '▎' },
-                untracked = { text = '▎' },
-            },
-            signs_staged = {
-                add = { text = '▎' },
-                change = { text = '▎' },
-                delete = { text = '' },
-                topdelete = { text = '' },
-                changedelete = { text = '▎' },
-            },
-        },
     },
 }
