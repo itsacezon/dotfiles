@@ -13,6 +13,8 @@ return {
         'folke/tokyonight.nvim',
         lazy = false,
         priority = 1000,
+        ---@module 'tokyonight'
+        ---@type tokyonight.Config
         opts = {
             style = 'night',
             dim_inactive = true,
@@ -21,10 +23,19 @@ return {
                 sidebars = 'transparent',
                 floats = 'transparent',
             },
+            on_colors = function(colors)
+                colors.comment = '#6272a4'
+            end,
+            on_highlights = function(hl, colors)
+                hl.LineNrAbove = { fg = colors.comment }
+                hl.LineNrBelow = { fg = colors.comment }
+                hl.DiagnosticUnnecessary = { fg = colors.comment }
+            end,
         },
         config = function(_, opts)
             require('tokyonight').setup(opts)
             vim.cmd([[ colorscheme tokyonight-night ]])
+            vim.cmd([[ hi Comment gui=none ]])
         end,
     },
     {
@@ -99,12 +110,13 @@ return {
         'folke/snacks.nvim',
         priority = 1000,
         lazy = false,
+        ---@module 'snacks'
         ---@type snacks.Config
         opts = {
             bigfile = { enabled = true },
             dashboard = { enabled = false },
             explorer = { enabled = false },
-            image = { enabled = false },
+            image = { enabled = true },
             indent = {
                 enabled = true,
                 animate = { enabled = false },
@@ -114,7 +126,7 @@ return {
                 scope = {
                     char = '▏',
                     only_current = true,
-                    hl = 'Directory',
+                    hl = 'LineNrAbove'
                 },
             },
             input = { enabled = true },
@@ -163,6 +175,8 @@ return {
             { 'echasnovski/mini.icons', opts = {} },
             'folke/snacks.nvim',
         },
+        ---@module 'oil'
+        ---@type oil.SetupOpts
         opts = {
             keymaps = {
                 ['<Leader>v'] = '<Cmd>q<CR>',
@@ -211,7 +225,9 @@ return {
         branch = 'main',
         dependencies = {
             { 'echasnovski/mini.icons', opts = {} },
+            'folke/snacks.nvim',
         },
+        ---@module 'fzf-lua'
         opts = {
             defaults = {
                 file_icons = 'mini',

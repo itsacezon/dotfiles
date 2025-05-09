@@ -18,7 +18,17 @@ local function format_ts_error(diagnostic)
 end
 
 return {
-    'neovim/nvim-lspconfig',
+    {
+        'neovim/nvim-lspconfig',
+        dependencies = { 'utils' },
+        -- config = function(_, opts)
+        --     local util = require('lspconfig.util')
+        --
+        --     require('lspconfig/quick_lint_js').setup({
+        --         root_dir = util.root_pattern('yarn.lock', 'package.json', '.git')
+        --     })
+        -- end,
+    },
 
     {
         'davidosomething/format-ts-errors.nvim',
@@ -101,6 +111,7 @@ return {
                     includeInlayParameterNameHints = 'all',
                 },
                 tsserver_plugins = {
+                    '@typescript-eslint/eslint-plugin',
                     '@vue/typescript-plugin',
                 },
                 jsx_close_tag = {
@@ -125,7 +136,7 @@ return {
                 },
                 signs = {
                     text = {
-                        [vim.diagnostic.severity.ERROR] = '✘',
+                        [vim.diagnostic.severity.ERROR] = '●',
                         [vim.diagnostic.severity.WARN] = '!',
                         [vim.diagnostic.severity.HINT] = '?',
                         [vim.diagnostic.severity.INFO] = 'i',
