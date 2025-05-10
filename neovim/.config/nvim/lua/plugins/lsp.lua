@@ -5,43 +5,41 @@ local function lsp_split_to(command)
     end
 end
 
-local function format_ts_error(diagnostic)
-    local formatter = require('format-ts-errors')[diagnostic.code]
-    local message = formatter and formatter(diagnostic.message) or diagnostic.message
-
-    return string.format(
-        "%s (%s) [%s]",
-        message,
-        diagnostic.source,
-        diagnostic.code or diagnostic.user_data.lsp.code
-    )
-end
-
+---@module 'lazy'
+---@type LazySpec
 return {
     {
         'neovim/nvim-lspconfig',
-        dependencies = { 'utils' },
-        -- config = function(_, opts)
-        --     local util = require('lspconfig.util')
-        --
-        --     require('lspconfig/quick_lint_js').setup({
-        --         root_dir = util.root_pattern('yarn.lock', 'package.json', '.git')
-        --     })
-        -- end,
-    },
-
-    {
-        'davidosomething/format-ts-errors.nvim',
-        opts = {
-            add_markdown = true,
-            start_indent_level = 1,
+        dependencies = {
+            'utils',
         },
+        config = function()
+            vim.diagnostic.config({
+                underline = true,
+                update_in_insert = true,
+                virtual_text = false,
+                float = {
+                    border = 'rounded',
+                    scope = 'cursor',
+                },
+                signs = {
+                    text = {
+                        [vim.diagnostic.severity.ERROR] = '●',
+                        [vim.diagnostic.severity.WARN] = '!',
+                        [vim.diagnostic.severity.HINT] = '?',
+                        [vim.diagnostic.severity.INFO] = 'i',
+                    },
+                },
+            })
+        end,
     },
 
     {
         'Fildo7525/pretty_hover',
-        event = 'LspAttach',
         opts = {},
+        keys = {
+            { 'K', function() require('pretty_hover').hover() end },
+        },
     },
 
     {
@@ -64,19 +62,18 @@ return {
                 },
             },
         },
+        keys = {
+            { 'L', '<Cmd>Trouble diagnostics_buffer toggle<CR>' },
+        },
     },
 
     {
         'pmizio/typescript-tools.nvim',
-        event = 'BufReadPost',
         dependencies = {
             'nvim-lua/plenary.nvim',
             'neovim/nvim-lspconfig',
             'artemave/workspace-diagnostics.nvim',
             'davidosomething/format-ts-errors.nvim',
-            'Fildo7525/pretty_hover',
-            'folke/snacks.nvim',
-            'folke/trouble.nvim',
             'utils',
             {
                 'saghen/blink.cmp',
@@ -84,10 +81,14 @@ return {
                 priority = 1000,
             },
         },
+        ---@module 'lspconfig'
+        ---@type lspconfig.Config
+        ---@diagnostic disable-next-line:missing-fields
         opts = {
-            -- on_attach = function(client, bufnr)
-            --     require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
-            -- end,
+            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+            root_dir = function(_, bufnr)
+                return require('utils').root_dir(bufnr)
+            end,
             handlers = {
                 ['textDocument/publishDiagnostics'] = function(_, result, ctx, config)
                     if result.diagnostics == nil then return end
@@ -95,13 +96,21 @@ return {
                     -- codes: https://github.com/microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json
                     local filter = require('typescript-tools.api').filter_diagnostics({ 80001 })
                     filter(_, result, ctx, config)
-                end
+                end,
             },
-            root_dir = function(_, bufnr)
-                return require('utils').root_dir(bufnr)
+            on_attach = function()
+                -- TODO: Limit using tsconfig.json
+                -- require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
+
+                local api = require('typescript-tools.api')
+
+                vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
+                vim.keymap.set('n', 'gr', api.file_references)
             end,
-            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+            ---@type Settings
+            ---@diagnostic disable-next-line:missing-fields
             settings = {
+                ---@diagnostic disable-next-line:assign-type-mismatch
                 expose_as_code_action = 'all',
                 publish_diagnostic_on = 'change',
                 tsserver_max_memory = 18432,
@@ -120,41 +129,56 @@ return {
                 }
             },
         },
-        config = function(_, opts)
-            require('typescript-tools').setup(opts)
+    },
 
-            local api = require('typescript-tools.api')
+    {
+        'davidosomething/format-ts-errors.nvim',
+        dependencies = { 'pmizio/typescript-tools.nvim' },
+        opts = {
+            add_markdown = true,
+        },
+        config = function(_, opts)
+            local format_ts_errors = require('format-ts-errors');
+            format_ts_errors.setup(opts)
+
+            ---@param diagnostic vim.Diagnostic
+            local function format_ts_error(diagnostic)
+                ---@type (fun(message: string): string) | nil
+                local formatter = format_ts_errors[diagnostic.code]
+                local message = formatter and formatter(diagnostic.message) or diagnostic.message
+
+                return string.format(
+                    "%s (%s) [%s]",
+                    message,
+                    diagnostic.source,
+                    diagnostic.code or diagnostic.user_data.lsp.code
+                )
+            end
 
             vim.diagnostic.config({
-                underline = true,
-                update_in_insert = true,
-                virtual_text = false,
                 float = {
-                    border = 'rounded',
-                    scope = 'cursor',
                     format = format_ts_error,
                 },
-                signs = {
-                    text = {
-                        [vim.diagnostic.severity.ERROR] = '●',
-                        [vim.diagnostic.severity.WARN] = '!',
-                        [vim.diagnostic.severity.HINT] = '?',
-                        [vim.diagnostic.severity.INFO] = 'i',
-                    },
-                },
             })
-
-            vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
-            vim.keymap.set('n', 'gr', api.file_references)
-            vim.keymap.set('n', 'K', require('pretty_hover').hover)
-            -- vim.keymap.set('n', 'K', vim.lsp.buf.hover)
-            vim.keymap.set('n', 'L', '<Cmd>Trouble diagnostics_buffer toggle<CR>')
         end,
     },
 
     {
         'mfussenegger/nvim-lint',
         dependencies = { 'utils' },
+        ---@class lint.CmdContext
+        ---@field cwd string
+
+        ---@class lint.CustomLinter: lint.Linter
+        ---@field cmd string | fun(bufnr: integer, ctx: lint.CmdContext):string Command to executre
+        ---@field cwd string | fun(bufnr: integer):string? Current working directory
+        ---@field name string? Name of the linter (define if not existing)
+        ---@field parser lint.Parser? Parse function for a linter
+
+        ---@class lint.Config
+        ---@field events string | string[] Event(s) that will trigger the handler
+        ---@field linters_by_ft table<string, string[]> Linters to run via `try_lint`. The key is the filetype. The values are a list of linter names
+        ---@field linters table<string, lint.CustomLinter|fun():lint.CustomLinter>
         opts = {
             events = { 'BufWritePost', 'InsertLeave' },
             linters_by_ft = {
@@ -173,12 +197,14 @@ return {
                 },
             },
         },
+        ---@overload fun(plugin: LazyPlugin, opts: lint.Config)
         config = function(_, opts)
             local lint = require('lint')
 
             for name, linter in pairs(opts.linters) do
-                if type(linter) == 'table' and type(lint.linters[name]) == 'table' then
-                    lint.linters[name] = vim.tbl_deep_extend('force', lint.linters[name], linter)
+                local existing_linter = lint.linters[name]
+                if type(linter) == 'table' and type(existing_linter) == 'table' then
+                    lint.linters[name] = vim.tbl_deep_extend('force', existing_linter, linter)
                 else
                     lint.linters[name] = linter
                 end
@@ -186,6 +212,7 @@ return {
 
             lint.linters_by_ft = opts.linters_by_ft
 
+            ---@param event vim.api.keyset.create_autocmd.callback_args
             local function try_lint(event)
                 local names = lint._resolve_linter_by_ft(vim.bo.filetype)
 
@@ -219,6 +246,7 @@ return {
     {
         'stevearc/conform.nvim',
         events = { 'BufWritePost', 'InsertLeave' },
+        ---@type conform.setupOpts
         opts = {
             formatters_by_ft = {
                 json = { 'prettier' },
@@ -250,12 +278,19 @@ return {
     {
         'folke/lazydev.nvim',
         ft = 'lua',
+        ---@module 'lazydev'
         opts = {
+            ---@type lazydev.Library.spec[]
             library = {
                 'lazy.nvim',
                 -- Load luvit types when the `vim.uv` word is found
                 { path = "${3rd}/luv/library", words = { "vim%.uv" } },
             },
         },
+        ---@overload fun(plugin: LazyPlugin, opts: lazydev.Config)
+        config = function(_, opts)
+            require('lazydev').setup(opts)
+            vim.lsp.enable({ 'lua_ls' })
+        end,
     },
 }

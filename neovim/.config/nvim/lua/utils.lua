@@ -1,5 +1,3 @@
-local vim = vim -- Prevents undefined vim if overridden somewhere else
-
 local M = {}
 
 ---@param bufnr integer | nil

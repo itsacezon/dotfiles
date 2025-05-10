@@ -1,3 +1,5 @@
+---@module 'lazy'
+---@type LazySpec
 return {
     --  Core
     'nvim-lua/plenary.nvim',
@@ -35,7 +37,7 @@ return {
         config = function(_, opts)
             require('tokyonight').setup(opts)
             vim.cmd([[ colorscheme tokyonight-night ]])
-            vim.cmd([[ hi Comment gui=none ]])
+            vim.cmd([[ highlight Comment gui=none ]])
         end,
     },
     {
@@ -175,6 +177,11 @@ return {
             { 'echasnovski/mini.icons', opts = {} },
             'folke/snacks.nvim',
         },
+        init = function()
+            -- Disable netrw
+            vim.g.loaded_netrw = 1
+            vim.g.loaded_netrwPlugin = 1
+        end,
         ---@module 'oil'
         ---@type oil.SetupOpts
         opts = {
@@ -227,6 +234,9 @@ return {
             { 'echasnovski/mini.icons', opts = {} },
             'folke/snacks.nvim',
         },
+        init = function()
+            vim.env.FZF_DEFAULT_OPTS = ''
+        end,
         ---@module 'fzf-lua'
         opts = {
             defaults = {

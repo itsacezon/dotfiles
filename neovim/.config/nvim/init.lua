@@ -3,7 +3,6 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 -- Tabs / spaces
--- vim.opt.smarttab = false
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
@@ -11,8 +10,6 @@ vim.opt.showtabline = 2 -- Always show tabline
 vim.opt.expandtab = true
 
 -- Line break
--- vim.opt.textwidth = 79
--- vim.opt.colorcolumn = { 80, 120 }
 vim.opt.breakindent = true
 vim.opt.linebreak = true
 
@@ -29,16 +26,9 @@ vim.opt.listchars = {
 vim.opt.list = true
 vim.opt.showbreak = '↪'
 
--- Built-in completion & tag search
-vim.opt.completeopt = 'menu'
--- vim.opt.completeopt:append({ 'menuone', 'noinsert' })
--- vim.opt.complete:remove({ 't' })
--- vim.opt.completefunc = "v:lua.require'snipcomp'"
-
 -- Show line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
--- vim.opt.statuscolumn = '%{v:relnum?v:relnum:v:lnum} %s %C'
 
 -- Mouse / clipboard
 vim.opt.clipboard = 'unnamed'
@@ -56,22 +46,16 @@ vim.opt.virtualedit = 'block'
 vim.opt.visualbell = true
 vim.opt.pumblend = 20
 vim.opt.winblend = 20
+vim.opt.winborder = 'rounded'
 
 -- Globals
 vim.g.mapleader = ','
-
--- Netrw - Disable
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
 
 -- Python
 vim.g.python3_host_prog = vim.fn.exepath('python')
 
 -- Sass
 vim.g.sass_recommended_style = 0
-
--- Better co-op with fzf-lua
-vim.env.FZF_DEFAULT_OPTS = ''
 
 -- Set default keymap options
 local keymap_set = vim.keymap.set
@@ -85,10 +69,6 @@ end
 
 -- Load plugins
 require('config.lazy')
-
--- LSPs
-vim.lsp.enable({ 'lua_ls' })
-vim.o.winborder = 'rounded'
 
 -- Autocommands
 local au = require('autocmd')

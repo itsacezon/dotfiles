@@ -1,5 +1,3 @@
-local vim = vim -- Prevents undefined vim when overridden somewhere else
-
 -- Small wrapper around autocmd functions.
 -- From: https://github.com/potamides/dotfiles/blob/master/.config/nvim/lua/au.lua
 

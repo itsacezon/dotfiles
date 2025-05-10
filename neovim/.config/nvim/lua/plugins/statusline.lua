@@ -1,13 +1,5 @@
-local function format_winbar(fname, context)
-    local metadata = require('utils').get_file_metadata(vim.api.nvim_get_current_buf())
-
-    if metadata.package_name ~= nil then
-        return metadata.relative_path .. (vim.bo.modified and ' [+]' or '')
-    else
-        return fname
-    end
-end
-
+---@module 'lazy'
+---@type LazySpec
 return {
     'itchyny/vim-gitbranch',
 
@@ -46,6 +38,17 @@ return {
         },
         config = function(_, opts)
             local colors = require('tokyonight.colors').setup()
+
+            ---@param fname string
+            local function format_winbar(fname, context)
+                local metadata = require('utils').get_file_metadata(vim.api.nvim_get_current_buf())
+
+                if metadata.package_name ~= nil then
+                    return metadata.relative_path .. (vim.bo.modified and ' [+]' or '')
+                else
+                    return fname
+                end
+            end
 
             require('lualine').setup(vim.tbl_deep_extend('error', opts, {
                 winbar = {
