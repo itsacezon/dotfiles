@@ -42,7 +42,7 @@ return {
     },
     {
         'catgoose/nvim-colorizer.lua',
-        event = 'BufReadPre',
+        event = 'BufReadPost',
         opts = {},
     },
 
@@ -76,16 +76,16 @@ return {
             signs = {
                 add = { text = '▎' },
                 change = { text = '▎' },
-                delete = { text = '' },
-                topdelete = { text = '' },
+                delete = { text = '▁' },
+                topdelete = { text = '▔' },
                 changedelete = { text = '▎' },
                 untracked = { text = '▎' },
             },
             signs_staged = {
                 add = { text = '▎' },
                 change = { text = '▎' },
-                delete = { text = '' },
-                topdelete = { text = '' },
+                delete = { text = '▁' },
+                topdelete = { text = '▔' },
                 changedelete = { text = '▎' },
             },
         },
@@ -173,6 +173,7 @@ return {
     --  File browser
     {
         'stevearc/oil.nvim',
+        cmd = 'Oil',
         dependencies = {
             { 'echasnovski/mini.icons', opts = {} },
             'folke/snacks.nvim',
@@ -217,9 +218,13 @@ return {
             })
 
             -- Set keymaps
-            vim.keymap.set('', '<Leader>v', '<Cmd>vsplit | Oil<CR>')
-            vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
+            -- vim.keymap.set('', '<Leader>v', '<Cmd>vsplit | Oil<CR>')
+            -- vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
         end,
+        keys = {
+            { '<Leader>v', '<Cmd>vsplit | Oil<CR>' },
+            { '-',         '<Cmd>Oil<CR>' },
+        },
     },
 
     --  Fuzzy file searching
@@ -237,7 +242,6 @@ return {
         init = function()
             vim.env.FZF_DEFAULT_OPTS = ''
         end,
-        ---@module 'fzf-lua'
         opts = {
             defaults = {
                 file_icons = 'mini',
@@ -283,6 +287,7 @@ return {
     -- Commenting
     {
         'JoosepAlviste/nvim-ts-context-commentstring',
+        lazy = true,
         opts = {
             enable_autocmd = false,
         },

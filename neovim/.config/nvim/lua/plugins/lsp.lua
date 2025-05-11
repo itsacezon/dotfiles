@@ -24,7 +24,7 @@ return {
                 },
                 signs = {
                     text = {
-                        [vim.diagnostic.severity.ERROR] = '●',
+                        [vim.diagnostic.severity.ERROR] = '▶',
                         [vim.diagnostic.severity.WARN] = '!',
                         [vim.diagnostic.severity.HINT] = '?',
                         [vim.diagnostic.severity.INFO] = 'i',
@@ -73,7 +73,6 @@ return {
             'nvim-lua/plenary.nvim',
             'neovim/nvim-lspconfig',
             'artemave/workspace-diagnostics.nvim',
-            'davidosomething/format-ts-errors.nvim',
             'utils',
             {
                 'saghen/blink.cmp',
@@ -81,10 +80,12 @@ return {
                 priority = 1000,
             },
         },
+        ft = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
         ---@module 'lspconfig'
         ---@type lspconfig.Config
         ---@diagnostic disable-next-line:missing-fields
         opts = {
+            -- Should always be the same as spec `ft`
             filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
             root_dir = function(_, bufnr)
                 return require('utils').root_dir(bufnr)
@@ -133,6 +134,7 @@ return {
 
     {
         'davidosomething/format-ts-errors.nvim',
+        lazy = true,
         dependencies = { 'pmizio/typescript-tools.nvim' },
         opts = {
             add_markdown = true,
@@ -273,7 +275,6 @@ return {
         },
     },
 
-
     -- For Neovim configs
     {
         'folke/lazydev.nvim',
@@ -291,6 +292,8 @@ return {
         config = function(_, opts)
             require('lazydev').setup(opts)
             vim.lsp.enable({ 'lua_ls' })
+
+            vim.keymap.set('n', 'gd', lsp_split_to(vim.lsp.buf.definition))
         end,
     },
 }

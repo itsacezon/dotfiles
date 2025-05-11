@@ -57,9 +57,9 @@ return {
                             'filename',
                             path = 1,
                             color = { gui = 'bold', fg = colors.fg, bg = colors.terminal_black },
-                            icon = '😍',
+                            icon = { '⬤', color = { fg = colors.green } },
                             fmt = format_winbar,
-                        }
+                        },
                     },
                 },
                 inactive_winbar = {
@@ -68,7 +68,8 @@ return {
                             'filename',
                             path = 1,
                             color = { fg = colors.fg_gutter, bg = 'dark' },
-                        }
+                            icon = '◯',
+                        },
                     },
                 },
             }))

@@ -1,19 +1,33 @@
--- Smart search
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
+-- Bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+    local lazyrepo = 'https://github.com/folke/lazy.nvim.git'
+    local out = vim.fn.system({ 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath })
 
--- Tabs / spaces
-vim.opt.tabstop = 4
-vim.opt.softtabstop = 4
-vim.opt.shiftwidth = 4
-vim.opt.showtabline = 2 -- Always show tabline
-vim.opt.expandtab = true
+    if vim.v.shell_error ~= 0 then
+        vim.api.nvim_echo({
+            { 'Failed to clone lazy.nvim:\n', 'ErrorMsg' },
+            { out,                            'WarningMsg' },
+            { '\nPress any key to exit...' },
+        }, true, {})
+        vim.fn.getchar()
+        os.exit(1)
+    end
+end
+vim.opt.rtp:prepend(lazypath)
 
--- Line break
+-- Globals
+vim.g.mapleader = ','
+vim.g.python3_host_prog = vim.fn.exepath('python')
+vim.g.sass_recommended_style = 0
+
+-- Settings
 vim.opt.breakindent = true
+vim.opt.expandtab = true
+vim.opt.ignorecase = true
+vim.opt.laststatus = 3
 vim.opt.linebreak = true
-
--- List characters
+vim.opt.list = true
 vim.opt.listchars = {
     space = '⋅',
     tab = '→ ',
@@ -23,41 +37,44 @@ vim.opt.listchars = {
     extends = '⟩',
     precedes = '⟨',
 }
-vim.opt.list = true
-vim.opt.showbreak = '↪'
-
--- Show line numbers
-vim.opt.number = true
-vim.opt.relativenumber = true
-
--- Mouse / clipboard
-vim.opt.clipboard = 'unnamed'
 vim.opt.mouse = 'a'
-
--- UI settings
-vim.opt.laststatus = 3
+vim.opt.number = true
+vim.opt.pumblend = 20
+vim.opt.relativenumber = true
 vim.opt.scrolloff = 10
+vim.opt.shiftwidth = 4
+vim.opt.showbreak = '↪'
 vim.opt.showmode = false
+vim.opt.showtabline = 2 -- Always show tabline
 vim.opt.sidescrolloff = 8
 vim.opt.signcolumn = 'yes'
+vim.opt.smartcase = true
+vim.opt.softtabstop = 4
 vim.opt.splitright = true
+vim.opt.tabstop = 4
 vim.opt.termguicolors = true
 vim.opt.virtualedit = 'block'
 vim.opt.visualbell = true
-vim.opt.pumblend = 20
 vim.opt.winblend = 20
 vim.opt.winborder = 'rounded'
 
--- Globals
-vim.g.mapleader = ','
+vim.schedule(function()
+    -- load later to avoid bad performance for "xsel" and "pbcopy"
+    vim.opt.clipboard = 'unnamed'
+end)
 
--- Python
-vim.g.python3_host_prog = vim.fn.exepath('python')
+-- Load plugins
+require('lazy').setup({
+    checker = { enabled = true },
+    install = { colorscheme = { 'tokyonight' } },
+    spec = {
+        -- Use the `plugins` folder
+        { import = 'plugins' }
+    },
+    ui = { border = 'rounded' },
+})
 
--- Sass
-vim.g.sass_recommended_style = 0
-
--- Set default keymap options
+-- Override vim.keymap.set with default options
 local keymap_set = vim.keymap.set
 ---@diagnostic disable-next-line: duplicate-set-field
 vim.keymap.set = function(mode, lhs, rhs, opts)
@@ -65,62 +82,6 @@ vim.keymap.set = function(mode, lhs, rhs, opts)
     opts.silent = opts.silent ~= false   -- Always true
     opts.noremap = opts.noremap ~= false -- Always true
     return keymap_set(mode, lhs, rhs, opts)
-end
-
--- Load plugins
-require('config.lazy')
-
--- Autocommands
-local au = require('autocmd')
-
--- Window autocommands
-local window = au({
-    'user_window',
-    pattern = '*',
-    Resize = { 'BufWinEnter', 'VimResized' },
-})
-function window.Resize()
-    -- Equally resize splits
-    vim.cmd([[ wincmd = ]])
-end
-
--- Jump to last position when opening a file
-local open = au('user_open')
-function open.BufReadPost()
-    local last_cursor_pos, last_line = vim.fn.line([['"]]), vim.fn.line('$')
-    if last_cursor_pos > 1 and last_cursor_pos <= last_line then
-        vim.fn.cursor(last_cursor_pos, 1)
-    end
-end
-
--- Formatting autocommands
-local format = au({ 'user_format', pattern = '*' })
-
-format.create_autocmd('BufWritePre', {
-    desc = 'Remove trailing whitespace',
-    command = [[ :%s/\s\+$//e ]],
-})
-
-format.create_autocmd('BufWritePre', {
-    desc = 'Remove newlines at the end of file',
-    command = [[ :%s/\($\n\s*\)\+\%$//e ]],
-})
-
--- Highlight selection on yank
-local yank = au('user_yank')
-function yank.TextYankPost()
-    vim.highlight.on_yank({ timeout = 200 })
-end
-
--- Automatically create missing directories
-local dir = au('user_directories')
-function dir.BufWritePre(event)
-    if event.match:match('^%w%w+://') then
-        return
-    end
-
-    local file = vim.uv.fs_realpath(event.match) or event.match
-    vim.fn.mkdir(vim.fn.fnamemodify(file, ':p:h'), 'p')
 end
 
 -- Clear search highlight
@@ -160,3 +121,49 @@ vim.keymap.set('i', '<Leader>;', '<C-o>A;')
 
 -- Terminal
 vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
+
+-- Autocommands
+vim.api.nvim_create_autocmd({ 'BufWinEnter', 'VimResized' }, {
+    pattern = '*',
+    command = [[ wincmd = ]],
+    desc = 'Equally resize splits',
+});
+
+vim.api.nvim_create_autocmd('BufReadPost', {
+    callback = function()
+        local last_cursor_pos, last_line = vim.fn.line([['"]]), vim.fn.line('$')
+        if last_cursor_pos > 1 and last_cursor_pos <= last_line then
+            vim.fn.cursor(last_cursor_pos, 1)
+        end
+    end,
+    desc = 'Jump to last position when opening a file',
+});
+
+vim.api.nvim_create_autocmd('BufWritePre', {
+    command = [[ :%s/\s\+$//e ]],
+    desc = 'Remove trailing whitespace',
+});
+
+vim.api.nvim_create_autocmd('BufWritePre', {
+    command = [[ :%s/\($\n\s*\)\+\%$//e ]],
+    desc = 'Remove newlines at the end of file',
+});
+
+vim.api.nvim_create_autocmd('BufWritePre', {
+    callback = function(event)
+        if event.match:match('^%w%w+://') then
+            return
+        end
+
+        local file = vim.uv.fs_realpath(event.match) or event.match
+        vim.fn.mkdir(vim.fn.fnamemodify(file, ':p:h'), 'p')
+    end,
+    desc = 'Automatically create missing directories',
+});
+
+vim.api.nvim_create_autocmd('TextYankPost', {
+    callback = function()
+        vim.highlight.on_yank({ timeout = 200 })
+    end,
+    desc = 'Highlight selection on yank',
+});
