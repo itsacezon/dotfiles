@@ -45,8 +45,12 @@ return {
     {
         'folke/trouble.nvim',
         cmd = 'Trouble',
+        ---@module 'trouble'
+        ---@type trouble.Config
         opts = {
             modes = {
+                ---@type trouble.Mode
+                ---@diagnostic disable-next-line:missing-fields
                 diagnostics_buffer = {
                     mode = 'diagnostics',
                     filter = {
@@ -58,6 +62,10 @@ return {
                         --     local within_col = cursor[2] < diagnostic.item.end_col
                         --     return within_line and within_col
                         -- end,
+                    },
+                    win = {
+                        type = 'split',
+                        size = 25,
                     },
                 },
             },
@@ -127,7 +135,7 @@ return {
                 jsx_close_tag = {
                     enable = true,
                     filetypes = { 'typescriptreact' },
-                }
+                },
             },
         },
     },
@@ -150,7 +158,7 @@ return {
                 local message = formatter and formatter(diagnostic.message) or diagnostic.message
 
                 return string.format(
-                    "%s (%s) [%s]",
+                    '%s (%s) [%s]',
                     message,
                     diagnostic.source,
                     diagnostic.code or diagnostic.user_data.lsp.code
@@ -285,12 +293,29 @@ return {
             library = {
                 'lazy.nvim',
                 -- Load luvit types when the `vim.uv` word is found
-                { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+                { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
             },
         },
         ---@overload fun(plugin: LazyPlugin, opts: lazydev.Config)
         config = function(_, opts)
             require('lazydev').setup(opts)
+
+            vim.lsp.config('lua_ls', {
+                settings = {
+                    Lua = {
+                        format = {
+                            enable = true,
+                            defaultConfig = {
+                                indent_style = 'space',
+                                indent_size = '4',
+                                quote_style = 'single',
+                                trailing_table_separator = 'smart',
+                            },
+                        },
+                    },
+                },
+            })
+
             vim.lsp.enable({ 'lua_ls' })
 
             vim.keymap.set('n', 'gd', lsp_split_to(vim.lsp.buf.definition))

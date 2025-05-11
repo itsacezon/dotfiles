@@ -29,15 +29,14 @@ return {
                 colors.comment = '#6272a4'
             end,
             on_highlights = function(hl, colors)
+                hl.DiagnosticUnnecessary = { fg = colors.comment }
                 hl.LineNrAbove = { fg = colors.comment }
                 hl.LineNrBelow = { fg = colors.comment }
-                hl.DiagnosticUnnecessary = { fg = colors.comment }
             end,
         },
         config = function(_, opts)
             require('tokyonight').setup(opts)
             vim.cmd([[ colorscheme tokyonight-night ]])
-            vim.cmd([[ highlight Comment gui=none ]])
         end,
     },
     {
@@ -50,9 +49,15 @@ return {
     {
         'nvim-treesitter/nvim-treesitter',
         build = ':TSUpdate',
+        ---@module 'nvim-treesitter.configs'
+        ---@type TSConfig
         opts = {
             auto_install = true,
+            sync_install = false,
+            ensure_installed = {},
             highlight = { enable = true },
+            ignore_install = { 'jinja', 'jinja_inline' }, -- See custom jinja parsers
+            modules = {},
         },
         config = function(_, opts)
             require('nvim-treesitter.configs').setup(opts)
@@ -128,7 +133,7 @@ return {
                 scope = {
                     char = '▏',
                     only_current = true,
-                    hl = 'LineNrAbove'
+                    hl = 'LineNrAbove',
                 },
             },
             input = { enabled = true },

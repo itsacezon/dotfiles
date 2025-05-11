@@ -5,7 +5,7 @@ return {
         'saghen/blink.cmp',
         dependencies = {
             'rafamadriz/friendly-snippets',
-            'Fildo7525/pretty_hover',
+            { 'Fildo7525/pretty_hover', lazy = true },
         },
         build = 'cargo build --release',
         ---@module 'blink.cmp'

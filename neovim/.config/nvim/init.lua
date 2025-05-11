@@ -63,17 +63,6 @@ vim.schedule(function()
     vim.opt.clipboard = 'unnamed'
 end)
 
--- Load plugins
-require('lazy').setup({
-    checker = { enabled = true },
-    install = { colorscheme = { 'tokyonight' } },
-    spec = {
-        -- Use the `plugins` folder
-        { import = 'plugins' }
-    },
-    ui = { border = 'rounded' },
-})
-
 -- Override vim.keymap.set with default options
 local keymap_set = vim.keymap.set
 ---@diagnostic disable-next-line: duplicate-set-field
@@ -83,6 +72,17 @@ vim.keymap.set = function(mode, lhs, rhs, opts)
     opts.noremap = opts.noremap ~= false -- Always true
     return keymap_set(mode, lhs, rhs, opts)
 end
+
+-- Load plugins
+require('lazy').setup({
+    checker = { enabled = true },
+    install = { colorscheme = { 'tokyonight' } },
+    spec = {
+        -- Use the `plugins` folder
+        { import = 'plugins' },
+    },
+    ui = { border = 'rounded' },
+})
 
 -- Clear search highlight
 vim.keymap.set('n', '<Esc>', '<Cmd>nohlsearch<CR>')
@@ -163,7 +163,7 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 
 vim.api.nvim_create_autocmd('TextYankPost', {
     callback = function()
-        vim.highlight.on_yank({ timeout = 200 })
+        vim.hl.on_yank({ timeout = 200 })
     end,
     desc = 'Highlight selection on yank',
 });

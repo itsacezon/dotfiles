@@ -1,56 +1,69 @@
 ---@module 'lazy'
 ---@type LazySpec
 return {
-    'itchyny/vim-gitbranch',
-
     {
         'nvim-lualine/lualine.nvim',
         dependencies = {
             'folke/tokyonight.nvim',
             'utils',
         },
-        opts = {
-            options = {
-                theme = 'tokyonight',
-                globalstatus = true,
-                section_separators = '',
-                component_separators = '',
-                disabled_filetypes = {
-                    winbar = { 'netrw', 'NvimTree' },
-                },
-            },
-            sections = {
-                lualine_c = {
-                    {
-                        'filename',
-                        path = 1,
-                    },
-                },
-            },
-            tabline = {
-                lualine_a = {
-                    {
-                        'tabs',
-                        mode = 2,
-                    },
-                },
-            },
-        },
-        config = function(_, opts)
+        config = function()
             local colors = require('tokyonight.colors').setup()
 
             ---@param fname string
             local function format_winbar(fname, context)
-                local metadata = require('utils').get_file_metadata(vim.api.nvim_get_current_buf())
+                local ok, oil = pcall(require, 'oil')
+                if ok and vim.bo.filetype == 'oil' then
+                    return 'oil: ' .. vim.fn.fnamemodify(oil.get_current_dir() or '', ':~')
+                end
 
+                local metadata = require('utils').get_file_metadata(vim.api.nvim_get_current_buf())
                 if metadata.package_name ~= nil then
                     return metadata.relative_path .. (vim.bo.modified and ' [+]' or '')
-                else
-                    return fname
                 end
+
+                return fname
             end
 
-            require('lualine').setup(vim.tbl_deep_extend('error', opts, {
+            require('lualine').setup({
+                options = {
+                    theme = 'tokyonight',
+                    globalstatus = false,
+                    component_separators = { left = '', right = '' },
+                    section_separators = { left = '', right = '' },
+                },
+                sections = {
+                    lualine_a = {
+                        {
+                            'lsp_status',
+                            icon = '🮲🮳',
+                            symbols = {
+                                spinner = { '🭶', '🭷', '🭸', '🭹', '🭺', '🭻', '🭺', '🭹', '🭸', '🭷' },
+                                done = '✔',
+                                separator = '⌇',
+                            },
+                        },
+                    },
+                    lualine_b = { 'filetype' },
+                    lualine_c = {},
+                    lualine_x = { 'encoding', 'fileformat' },
+                    lualine_y = { 'location' },
+                    lualine_z = {},
+                },
+                tabline = {
+                    lualine_a = { 'mode' },
+                    lualine_b = {
+                        {
+                            'tabs',
+                            mode = 2,
+                            tab_max_length = 64,
+                            max_length = function()
+                                return vim.o.columns / 2
+                            end,
+                        },
+                    },
+                    lualine_y = { 'branch' },
+                },
                 winbar = {
                     lualine_a = {
                         {
@@ -67,12 +80,12 @@ return {
                         {
                             'filename',
                             path = 1,
-                            color = { fg = colors.fg_gutter, bg = 'dark' },
+                            color = { fg = colors.fg_gutter, bg = colors.bg },
                             icon = '◯',
                         },
                     },
                 },
-            }))
+            })
         end,
     },
 
@@ -109,8 +122,6 @@ return {
                     guifg = colors.fg,
                     guibg = colors.terminal_black,
                     blend = 0,
-                    -- guifg = props.focused and colors.fg or colors.fg_gutter,
-                    -- guibg = props.focused and colors.terminal_black or colors.bg,
                 }
             end,
         },
