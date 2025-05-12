@@ -32,6 +32,8 @@ return {
                 hl.DiagnosticUnnecessary = { fg = colors.comment }
                 hl.LineNrAbove = { fg = colors.comment }
                 hl.LineNrBelow = { fg = colors.comment }
+                hl.StatusLineActive = { bold = true, bg = colors.fg_gutter }
+                hl.WinSeparatorActive = { bold = true, fg = colors.fg_gutter }
             end,
         },
         config = function(_, opts)

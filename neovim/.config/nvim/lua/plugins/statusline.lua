@@ -33,7 +33,8 @@ return {
                     section_separators = { left = '', right = '' },
                 },
                 sections = {
-                    lualine_a = {
+                    lualine_a = {},
+                    lualine_b = {
                         {
                             'lsp_status',
                             icon = '🮲🮳',
@@ -44,32 +45,32 @@ return {
                             },
                         },
                     },
-                    lualine_b = { 'filetype' },
-                    lualine_c = {},
-                    lualine_x = { 'encoding', 'fileformat' },
+                    lualine_c = { 'filetype' },
+                    lualine_x = { 'fileformat', 'encoding' },
                     lualine_y = { 'location' },
                     lualine_z = {},
                 },
                 tabline = {
-                    lualine_a = { 'mode' },
-                    lualine_b = {
+                    lualine_a = {
                         {
                             'tabs',
                             mode = 2,
                             tab_max_length = 64,
+                            use_mode_colors = true,
                             max_length = function()
                                 return vim.o.columns / 2
                             end,
                         },
                     },
                     lualine_y = { 'branch' },
+                    lualine_z = { 'mode' },
                 },
                 winbar = {
                     lualine_a = {
                         {
                             'filename',
                             path = 1,
-                            color = { gui = 'bold', fg = colors.fg, bg = colors.terminal_black },
+                            color = { gui = 'bold', fg = colors.fg, bg = colors.fg_gutter },
                             icon = { '⬤', color = { fg = colors.green } },
                             fmt = format_winbar,
                         },
