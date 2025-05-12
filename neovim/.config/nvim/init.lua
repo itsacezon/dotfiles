@@ -25,6 +25,16 @@ vim.g.sass_recommended_style = 0
 vim.opt.breakindent = true
 vim.opt.expandtab = true
 vim.opt.ignorecase = true
+vim.opt.fillchars = {
+    horiz = '━',
+    horizup = '┻',
+    horizdown = '┳',
+    -- vert = '┃',
+    vert = '█',
+    vertleft = '┫',
+    vertright = '┣',
+    verthoriz = '╋',
+}
 vim.opt.laststatus = 3
 vim.opt.linebreak = true
 vim.opt.list = true
@@ -128,6 +138,30 @@ vim.api.nvim_create_autocmd({ 'BufWinEnter', 'VimResized' }, {
     command = [[ wincmd = ]],
     desc = 'Equally resize splits',
 });
+
+vim.api.nvim_create_autocmd('WinEnter', {
+    callback = function()
+        local left_win = vim.fn.win_getid(vim.fn.winnr('h'))
+        local current_win = vim.fn.win_getid(vim.fn.winnr())
+
+        vim.wo[left_win].winhighlight =
+        'WinSeparator:WinSeparatorActive,StatusLine:StatusLineActive,StatusLineNC:StatusLineActive'
+        vim.wo[current_win].winhighlight =
+        'WinSeparator:WinSeparatorActive,StatusLine:StatusLineActive,StatusLineNC:StatusLineActive'
+    end,
+})
+
+vim.api.nvim_create_autocmd('WinLeave', {
+    callback = function()
+        local left_win = vim.fn.win_getid(vim.fn.winnr('h'))
+        local right_win = vim.fn.win_getid(vim.fn.winnr('l'))
+        local current_win = vim.fn.win_getid(vim.fn.winnr())
+
+        vim.wo[left_win].winhighlight = 'WinSeparator:WinSeparator,StatusLine:StatusLine,StatusLineNC:StatusLineNC'
+        vim.wo[right_win].winhighlight = 'WinSeparator:WinSeparator,StatusLine:StatusLine,StatusLineNC:StatusLineNC'
+        vim.wo[current_win].winhighlight = 'WinSeparator:WinSeparator,StatusLine:StatusLine,StatusLineNC:StatusLineNC'
+    end,
+})
 
 vim.api.nvim_create_autocmd('BufReadPost', {
     callback = function()
