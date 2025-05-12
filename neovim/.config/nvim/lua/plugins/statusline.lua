@@ -118,11 +118,15 @@ return {
                 if metadata.package_name == nil then return nil end
 
                 return {
-                    ' ' .. metadata.package_name .. ' ',
-                    gui = 'bold',
-                    guifg = colors.fg,
-                    guibg = colors.terminal_black,
-                    blend = 0,
+                    { '', guifg = colors.fg_gutter, guibg = 'none', blend = 0 },
+                    { '♦ ', guifg = colors.purple, guibg = colors.fg_gutter, blend = 0 },
+                    {
+                        metadata.package_name .. ' ',
+                        gui = 'bold',
+                        guifg = colors.fg,
+                        guibg = colors.fg_gutter,
+                        blend = 0,
+                    },
                 }
             end,
         },

@@ -139,6 +139,9 @@ return {
                 },
             },
             input = { enabled = true },
+            lazygit = {
+                configure = true,
+            },
             notifier = { enabled = true },
             picker = { enabled = false },
             quickfile = { enabled = true },
@@ -157,9 +160,10 @@ return {
             words = { enabled = true },
         },
         keys = {
-            { '<Leader>n', function() Snacks.notifier.show_history() end,   desc = 'Notification History' },
-            { ']]',        function() Snacks.words.jump(vim.v.count1) end,  desc = 'Next Reference',      mode = { 'n', 't' } },
-            { '[[',        function() Snacks.words.jump(-vim.v.count1) end, desc = 'Prev Reference',      mode = { 'n', 't' } },
+            { '<Leader>n',  function() Snacks.notifier.show_history() end,   desc = 'Notification History' },
+            { ']]',         function() Snacks.words.jump(vim.v.count1) end,  desc = 'Next Reference',      mode = { 'n', 't' } },
+            { '[[',         function() Snacks.words.jump(-vim.v.count1) end, desc = 'Prev Reference',      mode = { 'n', 't' } },
+            { '<Leader>gg', function() Snacks.lazygit() end,                 desc = 'Lazygit' },
         },
     },
     {
