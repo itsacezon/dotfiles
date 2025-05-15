@@ -66,6 +66,90 @@ return {
         end,
     },
 
+    -- Snacks
+    {
+        'folke/snacks.nvim',
+        priority = 1000,
+        lazy = false,
+        ---@module 'snacks'
+        ---@type snacks.Config
+        opts = {
+            bigfile = { enabled = true },
+            dashboard = { enabled = false },
+            explorer = { enabled = false },
+            image = { enabled = true },
+            indent = {
+                enabled = true,
+                animate = { enabled = false },
+                indent = {
+                    char = '▏',
+                },
+                scope = {
+                    char = '▏',
+                    only_current = true,
+                    hl = 'LineNrAbove',
+                },
+            },
+            input = { enabled = true },
+            lazygit = {
+                configure = true,
+                win = {
+                    style = {
+                        border = 'rounded',
+                    },
+                },
+            },
+            notifier = { enabled = true },
+            picker = {
+                enabled = true,
+                prompt = '❯ ',
+                layout = {
+                    preset = 'dropdown',
+                },
+                formatters = {
+                    file = {
+                        truncate = 64,
+                        icon_width = 3,
+                    },
+                },
+                win = {
+                    input = {
+                        keys = {
+                            ['<Esc>'] = { 'close', mode = { 'n', 'i' } },
+                        },
+                    },
+                },
+            },
+            quickfile = { enabled = true },
+            scope = { enabled = false },
+            scroll = {
+                enabled = true,
+                animate = {
+                    duration = { step = 10 },
+                },
+            },
+            statuscolumn = {
+                enabled = true,
+                left = { 'git', 'fold' },
+                right = { 'mark', 'sign' },
+            },
+            words = { enabled = true },
+        },
+        keys = {
+            { ']]',              function() Snacks.words.jump(vim.v.count1) end,                       desc = 'Next Reference', mode = { 'n', 't' } },
+            { '[[',              function() Snacks.words.jump(-vim.v.count1) end,                      desc = 'Prev Reference', mode = { 'n', 't' } },
+            { '<Leader>n',       function() Snacks.notifier.show_history() end },
+            { '<Leader>gg',      function() Snacks.lazygit() end },
+            -- -- Use `rg`
+            { '<Leader><Space>', function() Snacks.picker.grep({ hidden = true }) end },
+            -- -- Use `fd`
+            { '<C-p>',           function() Snacks.picker.files({ hidden = true, ignored = true }) end },
+            {
+                'L', function() Snacks.picker.diagnostics_buffer() end,
+            },
+        },
+    },
+
     -- Git
     {
         'tpope/vim-fugitive',
@@ -113,57 +197,6 @@ return {
                 absolutenumber_unfocussed = true,
                 signcolumn = false,
             },
-        },
-    },
-    {
-        'folke/snacks.nvim',
-        priority = 1000,
-        lazy = false,
-        ---@module 'snacks'
-        ---@type snacks.Config
-        opts = {
-            bigfile = { enabled = true },
-            dashboard = { enabled = false },
-            explorer = { enabled = false },
-            image = { enabled = true },
-            indent = {
-                enabled = true,
-                animate = { enabled = false },
-                indent = {
-                    char = '▏',
-                },
-                scope = {
-                    char = '▏',
-                    only_current = true,
-                    hl = 'LineNrAbove',
-                },
-            },
-            input = { enabled = true },
-            lazygit = {
-                configure = true,
-            },
-            notifier = { enabled = true },
-            picker = { enabled = false },
-            quickfile = { enabled = true },
-            scope = { enabled = false },
-            scroll = {
-                enabled = true,
-                animate = {
-                    duration = { step = 10 },
-                },
-            },
-            statuscolumn = {
-                enabled = true,
-                left = { 'git', 'fold' },
-                right = { 'mark', 'sign' },
-            },
-            words = { enabled = true },
-        },
-        keys = {
-            { '<Leader>n',  function() Snacks.notifier.show_history() end,   desc = 'Notification History' },
-            { ']]',         function() Snacks.words.jump(vim.v.count1) end,  desc = 'Next Reference',      mode = { 'n', 't' } },
-            { '[[',         function() Snacks.words.jump(-vim.v.count1) end, desc = 'Prev Reference',      mode = { 'n', 't' } },
-            { '<Leader>gg', function() Snacks.lazygit() end,                 desc = 'Lazygit' },
         },
     },
     {
@@ -235,56 +268,6 @@ return {
         keys = {
             { '<Leader>v', '<Cmd>vsplit | Oil<CR>' },
             { '-',         '<Cmd>Oil<CR>' },
-        },
-    },
-
-    --  Fuzzy file searching
-    {
-        'junegunn/fzf',
-        build = './install --bin',
-    },
-    {
-        'ibhagwan/fzf-lua',
-        branch = 'main',
-        dependencies = {
-            { 'echasnovski/mini.icons', opts = {} },
-            'folke/snacks.nvim',
-        },
-        init = function()
-            vim.env.FZF_DEFAULT_OPTS = ''
-        end,
-        opts = {
-            defaults = {
-                file_icons = 'mini',
-                git_icons = false,
-            },
-            files = {
-                prompt = '❯ ',
-                cwd_header = true,
-                cwd_prompt = false,
-            },
-            grep = {
-                prompt = '❯ ',
-                hidden = true,
-                rg_glob = true,
-            },
-            winopts = {
-                height = 0.6,
-                width = 0.8,
-                preview = {
-                    horizontal = 'right:40%',
-                },
-                on_close = function()
-                    -- Make lualine return to normal mode immediately
-                    vim.api.nvim_input('<Ignore>')
-                end,
-            },
-        },
-        keys = {
-            -- Use `rg`
-            { '<Leader><Space>', '<Cmd>FzfLua live_grep_glob<CR>' },
-            -- Use `fd`
-            { '<C-p>',           '<Cmd>FzfLua files<CR>' },
         },
     },
 

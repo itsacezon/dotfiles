@@ -35,47 +35,6 @@ return {
     },
 
     {
-        'Fildo7525/pretty_hover',
-        opts = {},
-        keys = {
-            { 'K', function() require('pretty_hover').hover() end },
-        },
-    },
-
-    {
-        'folke/trouble.nvim',
-        cmd = 'Trouble',
-        ---@module 'trouble'
-        ---@type trouble.Config
-        opts = {
-            modes = {
-                ---@type trouble.Mode
-                ---@diagnostic disable-next-line:missing-fields
-                diagnostics_buffer = {
-                    mode = 'diagnostics',
-                    filter = {
-                        buf = 0,
-                        -- Turn on if you want cursor-level filtering
-                        -- function(diagnostic)
-                        --     local cursor = vim.api.nvim_win_get_cursor(0)
-                        --     local within_line = cursor[1] - 1 == diagnostic.item.lnum
-                        --     local within_col = cursor[2] < diagnostic.item.end_col
-                        --     return within_line and within_col
-                        -- end,
-                    },
-                    win = {
-                        type = 'split',
-                        size = 25,
-                    },
-                },
-            },
-        },
-        keys = {
-            { 'L', '<Cmd>Trouble diagnostics_buffer toggle<CR>' },
-        },
-    },
-
-    {
         'pmizio/typescript-tools.nvim',
         dependencies = {
             'nvim-lua/plenary.nvim',
