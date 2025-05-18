@@ -140,15 +140,16 @@ vim.api.nvim_create_autocmd({ 'BufWinEnter', 'VimResized' }, {
     desc = 'Equally resize splits',
 });
 
+local activeWindowHighlights = 'WinSeparator:WinSeparatorActive,StatusLine:StatusLineActive,StatusLineNC:StatusLineActive'
+local inactiveWindowHighlights = 'WinSeparator:WinSeparator,StatusLine:StatusLine,StatusLineNC:StatusLineNC'
+
 vim.api.nvim_create_autocmd('WinEnter', {
     callback = function()
         local left_win = vim.fn.win_getid(vim.fn.winnr('h'))
         local current_win = vim.fn.win_getid(vim.fn.winnr())
 
-        vim.wo[left_win].winhighlight =
-        'WinSeparator:WinSeparatorActive,StatusLine:StatusLineActive,StatusLineNC:StatusLineActive'
-        vim.wo[current_win].winhighlight =
-        'WinSeparator:WinSeparatorActive,StatusLine:StatusLineActive,StatusLineNC:StatusLineActive'
+        vim.wo[left_win].winhighlight = activeWindowHighlights
+        vim.wo[current_win].winhighlight = activeWindowHighlights
     end,
 })
 
@@ -158,9 +159,9 @@ vim.api.nvim_create_autocmd('WinLeave', {
         local right_win = vim.fn.win_getid(vim.fn.winnr('l'))
         local current_win = vim.fn.win_getid(vim.fn.winnr())
 
-        vim.wo[left_win].winhighlight = 'WinSeparator:WinSeparator,StatusLine:StatusLine,StatusLineNC:StatusLineNC'
-        vim.wo[right_win].winhighlight = 'WinSeparator:WinSeparator,StatusLine:StatusLine,StatusLineNC:StatusLineNC'
-        vim.wo[current_win].winhighlight = 'WinSeparator:WinSeparator,StatusLine:StatusLine,StatusLineNC:StatusLineNC'
+        vim.wo[left_win].winhighlight = inactiveWindowHighlights
+        vim.wo[right_win].winhighlight = inactiveWindowHighlights
+        vim.wo[current_win].winhighlight = inactiveWindowHighlights
     end,
 })
 
