@@ -35,6 +35,28 @@ return {
     },
 
     {
+        'lewis6991/hover.nvim',
+        lazy = true,
+        event = { 'LspAttach' },
+        config = function()
+            local hover = require('hover')
+
+            hover.setup({
+                init = function()
+                    require('hover.providers.lsp')
+                    require('hover.providers.diagnostic')
+                end,
+                preview_opts = {
+                    border = 'rounded',
+                },
+                preview_window = true,
+            })
+
+            vim.keymap.set('n', 'K', hover.hover)
+        end,
+    },
+
+    {
         'pmizio/typescript-tools.nvim',
         dependencies = {
             'nvim-lua/plenary.nvim',
@@ -214,7 +236,7 @@ return {
 
     {
         'stevearc/conform.nvim',
-        events = { 'BufWritePost', 'InsertLeave' },
+        events = { 'LspAttach', 'BufWritePost', 'BufNewFile' },
         ---@type conform.setupOpts
         opts = {
             formatters_by_ft = {
@@ -223,9 +245,8 @@ return {
                 typescript = { 'prettier' },
                 typescriptreact = { 'prettier' },
             },
-            format_on_save = {
-                timeout_ms = 500,
-                lsp_fallback = true,
+            format_after_save = {
+                lsp_fallback = 'fallback',
             },
             formatters = {
                 svgo = {

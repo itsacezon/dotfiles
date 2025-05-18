@@ -18,6 +18,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- Globals
 vim.g.mapleader = ','
+vim.g.maplocalleader = ';'
 vim.g.python3_host_prog = vim.fn.exepath('python')
 vim.g.sass_recommended_style = 0
 
@@ -49,7 +50,7 @@ vim.opt.listchars = {
 }
 vim.opt.mouse = 'a'
 vim.opt.number = true
-vim.opt.pumblend = 20
+vim.opt.pumblend = 10
 vim.opt.relativenumber = true
 vim.opt.scrolloff = 10
 vim.opt.shiftwidth = 4
@@ -65,7 +66,7 @@ vim.opt.tabstop = 4
 vim.opt.termguicolors = true
 vim.opt.virtualedit = 'block'
 vim.opt.visualbell = true
-vim.opt.winblend = 20
+vim.opt.winblend = 10
 vim.opt.winborder = 'rounded'
 
 vim.schedule(function()
@@ -115,7 +116,7 @@ vim.keymap.set('n', '<Leader>cH', '<Cmd>let @*=expand("%:p:h")<CR>') -- Absolute
 -- Splits / tabs
 vim.keymap.set('', '<Leader>,', '<C-w>=')
 vim.keymap.set('n', '<Tab>', '<C-w>w')
-vim.keymap.set('n', '<Shift><Tab>', '<C-w>p')
+vim.keymap.set('n', '<S-Tab>', '<C-w>p')
 vim.keymap.set('n', '\\', '<Cmd>vnew<CR>')
 vim.keymap.set('n', '<Leader>\\', '<Cmd>vsplit<CR>')
 vim.keymap.set('n', '<C-t>', '<Cmd>tabnew<CR>')

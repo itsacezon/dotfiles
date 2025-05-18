@@ -21,10 +21,6 @@ return {
             style = 'night',
             dim_inactive = true,
             transparent = true,
-            styles = {
-                sidebars = 'transparent',
-                floats = 'transparent',
-            },
             on_colors = function(colors)
                 colors.comment = '#6272a4'
             end,
@@ -64,6 +60,12 @@ return {
         config = function(_, opts)
             require('nvim-treesitter.configs').setup(opts)
         end,
+    },
+
+    -- Find and replace
+    {
+        'MagicDuck/grug-far.nvim',
+        opts = {},
     },
 
     -- Snacks
@@ -108,7 +110,7 @@ return {
                 },
                 formatters = {
                     file = {
-                        truncate = 64,
+                        truncate = 72,
                         icon_width = 3,
                     },
                 },
@@ -165,12 +167,12 @@ return {
         opts = {
             numhl = false,
             signs = {
-                add = { text = '▎' },
-                change = { text = '▎' },
-                delete = { text = '▁' },
-                topdelete = { text = '▔' },
-                changedelete = { text = '▎' },
-                untracked = { text = '▎' },
+                add = { text = '▊' },
+                change = { text = '▊' },
+                delete = { text = '▄' },
+                topdelete = { text = '▀' },
+                changedelete = { text = '▊' },
+                untracked = { text = '▊' },
             },
             signs_staged = {
                 add = { text = '▎' },
@@ -212,6 +214,11 @@ return {
                 desc = 'Buffer Local Keymaps (which-key)',
             },
         },
+    },
+    {
+        'windwp/nvim-autopairs',
+        event = 'InsertEnter',
+        config = true,
     },
 
     --  File browser
@@ -271,13 +278,6 @@ return {
         },
     },
 
-    -- Formatting
-    {
-        'windwp/nvim-autopairs',
-        event = 'InsertEnter',
-        config = true,
-    },
-
     -- Commenting
     {
         'JoosepAlviste/nvim-ts-context-commentstring',
@@ -289,6 +289,7 @@ return {
     {
         'numToStr/Comment.nvim',
         dependencies = { 'JoosepAlviste/nvim-ts-context-commentstring' },
+        event = 'VeryLazy',
         config = function()
             require('Comment').setup({
                 pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
