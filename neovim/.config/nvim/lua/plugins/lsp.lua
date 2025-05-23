@@ -36,7 +36,6 @@ return {
 
     {
         'lewis6991/hover.nvim',
-        lazy = true,
         event = { 'LspAttach' },
         config = function()
             local hover = require('hover')
@@ -61,7 +60,7 @@ return {
         dependencies = {
             'nvim-lua/plenary.nvim',
             'neovim/nvim-lspconfig',
-            'artemave/workspace-diagnostics.nvim',
+            'dmmulroy/ts-error-translator.nvim',
             'utils',
             {
                 'saghen/blink.cmp',
@@ -80,18 +79,17 @@ return {
                 return require('utils').root_dir(bufnr)
             end,
             handlers = {
-                ['textDocument/publishDiagnostics'] = function(_, result, ctx, config)
+                ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
                     if result.diagnostics == nil then return end
+
+                    require('ts-error-translator').translate_diagnostics(err, result, ctx)
 
                     -- codes: https://github.com/microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json
                     local filter = require('typescript-tools.api').filter_diagnostics({ 80001 })
-                    filter(_, result, ctx, config)
+                    filter(err, result, ctx, config)
                 end,
             },
             on_attach = function()
-                -- TODO: Limit using tsconfig.json
-                -- require('workspace-diagnostics').populate_workspace_diagnostics(client, bufnr)
-
                 local api = require('typescript-tools.api')
 
                 vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
@@ -122,41 +120,9 @@ return {
     },
 
     {
-        'davidosomething/format-ts-errors.nvim',
-        lazy = true,
-        dependencies = { 'pmizio/typescript-tools.nvim' },
-        opts = {
-            add_markdown = true,
-        },
-        config = function(_, opts)
-            local format_ts_errors = require('format-ts-errors');
-            format_ts_errors.setup(opts)
-
-            ---@param diagnostic vim.Diagnostic
-            local function format_ts_error(diagnostic)
-                ---@type (fun(message: string): string) | nil
-                local formatter = format_ts_errors[diagnostic.code]
-                local message = formatter and formatter(diagnostic.message) or diagnostic.message
-
-                return string.format(
-                    '%s (%s) [%s]',
-                    message,
-                    diagnostic.source,
-                    diagnostic.code or diagnostic.user_data.lsp.code
-                )
-            end
-
-            vim.diagnostic.config({
-                float = {
-                    format = format_ts_error,
-                },
-            })
-        end,
-    },
-
-    {
         'mfussenegger/nvim-lint',
         dependencies = { 'utils' },
+        event = 'VeryLazy',
         ---@class lint.CmdContext
         ---@field cwd string
 
@@ -236,7 +202,7 @@ return {
 
     {
         'stevearc/conform.nvim',
-        events = { 'LspAttach', 'BufWritePost', 'BufNewFile' },
+        event = 'VeryLazy',
         ---@type conform.setupOpts
         opts = {
             formatters_by_ft = {

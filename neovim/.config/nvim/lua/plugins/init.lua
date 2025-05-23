@@ -1,9 +1,6 @@
 ---@module 'lazy'
 ---@type LazySpec
 return {
-    --  Core
-    'nvim-lua/plenary.nvim',
-
     -- Custom utilities
     {
         name = 'utils',
@@ -39,7 +36,7 @@ return {
     },
     {
         'catgoose/nvim-colorizer.lua',
-        event = 'BufReadPost',
+        event = 'VeryLazy',
         opts = {},
     },
 
@@ -65,6 +62,7 @@ return {
     -- Find and replace
     {
         'MagicDuck/grug-far.nvim',
+        cmd = 'GrugFar',
         opts = {},
     },
 
@@ -95,9 +93,14 @@ return {
             input = { enabled = true },
             lazygit = {
                 configure = true,
+                config = {
+                    git = { autoFetch = false },
+                },
                 win = {
                     style = {
                         border = 'rounded',
+                        title = 'Lazygit',
+                        title_pos = 'center',
                     },
                 },
             },
@@ -162,8 +165,8 @@ return {
     },
     {
         'lewis6991/gitsigns.nvim',
-        event = { 'BufReadPost', 'BufWritePost', 'BufNewFile' },
         dependencies = { 'nvim-lua/plenary.nvim' },
+        event = 'VeryLazy',
         opts = {
             numhl = false,
             signs = {
