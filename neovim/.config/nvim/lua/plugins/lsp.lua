@@ -51,7 +51,7 @@ return {
                 preview_window = true,
             })
 
-            vim.keymap.set('n', 'K', hover.hover)
+            vim.keymap.set('n', 'K', hover.hover, { buffer = true })
         end,
     },
 

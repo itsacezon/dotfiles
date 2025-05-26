@@ -4,6 +4,7 @@ return {
     {
         'saghen/blink.cmp',
         dependencies = {
+            'echasnovski/mini.icons',
             'rafamadriz/friendly-snippets',
         },
         build = 'cargo build --release',
@@ -14,10 +15,6 @@ return {
                 preset = 'default',
                 ['<CR>'] = { 'select_and_accept', 'fallback' },
             },
-            appearance = {
-                use_nvim_cmp_as_default = true,
-                nerd_font_variant = 'normal',
-            },
             completion = {
                 list = { selection = { preselect = false } },
                 menu = {
@@ -25,7 +22,27 @@ return {
                     draw = {
                         columns = {
                             { 'label',     'label_description', gap = 1 },
-                            { 'kind_icon', 'kind' },
+                            { 'kind_icon', 'kind', gap = 1 },
+                        },
+                        components = {
+                            kind_icon = {
+                                text = function(ctx)
+                                    local kind_icon, _, _ = require('mini.icons').get('lsp', ctx.kind)
+                                    return kind_icon
+                                end,
+                                -- (optional) use highlights from mini.icons
+                                highlight = function(ctx)
+                                    local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                                    return hl
+                                end,
+                            },
+                            kind = {
+                                -- (optional) use highlights from mini.icons
+                                highlight = function(ctx)
+                                    local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                                    return hl
+                                end,
+                            },
                         },
                     },
                 },

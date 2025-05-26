@@ -7,6 +7,7 @@ return {
             'folke/tokyonight.nvim',
             'utils',
         },
+        event = 'VeryLazy',
         config = function()
             local colors = require('tokyonight.colors').setup()
 

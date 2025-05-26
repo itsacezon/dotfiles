@@ -39,11 +39,17 @@ return {
         event = 'VeryLazy',
         opts = {},
     },
+    {
+        'echasnovski/mini.icons',
+        event = 'VeryLazy',
+        opts = {},
+    },
 
     --  Syntax highlighting
     {
         'nvim-treesitter/nvim-treesitter',
         build = ':TSUpdate',
+        event = 'VeryLazy',
         ---@module 'nvim-treesitter.configs'
         ---@type TSConfig
         opts = {
@@ -132,6 +138,12 @@ return {
                 animate = {
                     duration = { step = 10 },
                 },
+                filter = function(buf)
+                    return vim.g.snacks_scroll ~= false
+                        and vim.b[buf].snacks_scroll ~= false
+                        and vim.bo[buf].buftype ~= 'terminal'
+                        and vim.bo[buf].filetype ~= 'blink-cmp-menu'
+                end,
             },
             statuscolumn = {
                 enabled = true,
@@ -188,7 +200,10 @@ return {
     },
 
     --  Quality-of-life
-    'tpope/vim-obsession',
+    {
+        'tpope/vim-obsession',
+        cmd = 'Obsession',
+    },
     {
         'nvim-focus/focus.nvim',
         version = '*',
@@ -229,7 +244,6 @@ return {
         'stevearc/oil.nvim',
         cmd = 'Oil',
         dependencies = {
-            { 'echasnovski/mini.icons', opts = {} },
             'folke/snacks.nvim',
         },
         init = function()
@@ -270,10 +284,6 @@ return {
                     end
                 end,
             })
-
-            -- Set keymaps
-            -- vim.keymap.set('', '<Leader>v', '<Cmd>vsplit | Oil<CR>')
-            -- vim.keymap.set('n', '-', '<Cmd>Oil<CR>')
         end,
         keys = {
             { '<Leader>v', '<Cmd>vsplit | Oil<CR>' },
@@ -293,10 +303,10 @@ return {
         'numToStr/Comment.nvim',
         dependencies = { 'JoosepAlviste/nvim-ts-context-commentstring' },
         event = 'VeryLazy',
-        config = function()
-            require('Comment').setup({
+        opts = function ()
+            return {
                 pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook(),
-            })
+            }
         end,
     },
 }
