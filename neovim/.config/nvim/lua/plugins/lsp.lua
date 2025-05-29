@@ -11,6 +11,7 @@ return {
     {
         'neovim/nvim-lspconfig',
         dependencies = {
+            'lewis6991/hover.nvim',
             'utils',
         },
         config = function()
@@ -31,13 +32,7 @@ return {
                     },
                 },
             })
-        end,
-    },
 
-    {
-        'lewis6991/hover.nvim',
-        event = { 'LspAttach' },
-        config = function()
             local hover = require('hover')
 
             hover.setup({
@@ -51,7 +46,7 @@ return {
                 preview_window = true,
             })
 
-            vim.keymap.set('n', 'K', hover.hover, { buffer = true })
+            vim.keymap.set('n', 'K', hover.hover)
         end,
     },
 
@@ -89,7 +84,11 @@ return {
                     filter(err, result, ctx, config)
                 end,
             },
-            on_attach = function()
+            on_attach = function(client)
+                -- Use conform.nvim
+                client.server_capabilities.documentFormattingProvider = false
+                client.server_capabilities.documentRangeFormattingProvider = false
+
                 local api = require('typescript-tools.api')
 
                 vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
