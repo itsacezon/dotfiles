@@ -63,13 +63,13 @@ return {
                 priority = 1000,
             },
         },
-        ft = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+        ft = { 'astro', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
         ---@module 'lspconfig'
         ---@type lspconfig.Config
         ---@diagnostic disable-next-line:missing-fields
         opts = {
             -- Should always be the same as spec `ft`
-            filetypes = { 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
+            filetypes = { 'astro', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
             root_dir = function(_, bufnr)
                 return require('utils').root_dir(bufnr)
             end,
@@ -107,6 +107,7 @@ return {
                     includeInlayParameterNameHints = 'all',
                 },
                 tsserver_plugins = {
+                    '@astrojs/ts-plugin',
                     '@typescript-eslint/eslint-plugin',
                     '@vue/typescript-plugin',
                 },
