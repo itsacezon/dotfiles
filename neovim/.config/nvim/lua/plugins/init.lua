@@ -1,3 +1,5 @@
+local exclude_paths = { '*.d.ts', '__generated__', '*.bundle.js', '*.js.map', '**/build/assets/**' }
+
 ---@module 'lazy'
 ---@type LazySpec
 return {
@@ -160,7 +162,7 @@ return {
             -- -- Use `rg`
             { '<Leader><Space>', function() Snacks.picker.grep({ hidden = true }) end },
             -- -- Use `fd`
-            { '<C-p>',           function() Snacks.picker.files({ hidden = true, ignored = true }) end },
+            { '<C-p>',           function() Snacks.picker.files({ hidden = true, ignored = true, exclude = exclude_paths }) end },
             {
                 'L', function() Snacks.picker.diagnostics_buffer() end,
             },
