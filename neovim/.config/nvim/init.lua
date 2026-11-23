@@ -203,3 +203,8 @@ vim.api.nvim_create_autocmd('TextYankPost', {
     end,
     desc = 'Highlight selection on yank',
 });
+
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = { 'json', 'terraform', 'typescript', 'typescriptreact' },
+    callback = function() vim.treesitter.start() end,
+})

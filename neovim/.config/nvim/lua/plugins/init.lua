@@ -50,11 +50,13 @@ return {
     --  Syntax highlighting
     {
         'nvim-treesitter/nvim-treesitter',
+        lazy = false,
         build = ':TSUpdate',
-        event = 'VeryLazy',
-        ---@module 'nvim-treesitter.configs'
+        branch = 'main',
+        ---@module 'nvim-treesitter.config'
         ---@type TSConfig
         opts = {
+            install_dir = vim.fn.stdpath('data') .. '/treesitter',
             auto_install = true,
             sync_install = false,
             ensure_installed = {},
@@ -62,9 +64,6 @@ return {
             ignore_install = { 'jinja', 'jinja_inline' }, -- See custom jinja parsers
             modules = {},
         },
-        config = function(_, opts)
-            require('nvim-treesitter.configs').setup(opts)
-        end,
     },
 
     -- Find and replace

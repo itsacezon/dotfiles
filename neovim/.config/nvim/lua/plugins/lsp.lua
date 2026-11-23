@@ -21,7 +21,7 @@ return {
                 virtual_text = false,
                 float = {
                     border = 'rounded',
-                    scope = 'cursor',
+                    scope = 'line',
                 },
                 signs = {
                     text = {
@@ -35,27 +35,100 @@ return {
 
             local hover = require('hover')
 
-            hover.setup({
-                init = function()
-                    require('hover.providers.lsp')
-                    require('hover.providers.diagnostic')
-                end,
+            hover.config({
+                providers = {
+                    'hover.providers.diagnostic',
+                    'hover.providers.lsp',
+                },
+                mouse_providers = {
+                    'hover.providers.lsp',
+                },
                 preview_opts = {
                     border = 'rounded',
                 },
                 preview_window = true,
             })
 
-            vim.keymap.set('n', 'K', hover.hover)
+            -- Config
+            vim.lsp.config.tsc = {
+                settings = {
+                    typescript = {
+                        preferGoToSourceDefinition = true,
+                        inlayHints = {
+                            parameterNames = {
+                                enabled = 'all',
+                                suppressWhenArgumentMatchesName = true,
+                            },
+                            parameterTypes = { enabled = true },
+                            variableTypes = { enabled = true },
+                            propertyDeclarationTypes = { enabled = true },
+                            functionLikeReturnTypes = { enabled = true },
+                            enumMemberValues = { enabled = true },
+                        },
+                        preferences = {
+                            importModuleSpecifier = 'non-relative',
+                            includeCompletionsForModuleExports = true,
+                        },
+                        suggest = {
+                            autoImports = true,
+                        },
+                    },
+                },
+                root_markers = {
+                    { '.repo-root', 'yarn.lock' },
+                    {'tsconfig.json', 'package.json' },
+                    '.git',
+                },
+                root_dir = function(bufnr, on_dir)
+                    local root = require('utils').root_dir(bufnr)
+                    on_dir(root)
+                end,
+                -- handlers = {
+                --     ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
+                --         if result.diagnostics == nil then return end
+                --
+                --         -- codes: https://github.com/microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json
+                --         local filter = require('typescript-tools.api').filter_diagnostics({ 80001 })
+                --         filter(err, result, ctx, config)
+                --     end,
+                -- },
+                on_attach = function(client)
+                    -- Use conform.nvim
+                    client.server_capabilities.documentFormattingProvider = false
+                    client.server_capabilities.documentRangeFormattingProvider = false
+
+                end,
+            }
+
+            vim.lsp.lua_ls = {
+                settings = {
+                    Lua = {
+                        format = {
+                            enable = true,
+                            defaultConfig = {
+                                indent_style = 'space',
+                                indent_size = '4',
+                                quote_style = 'single',
+                                trailing_table_separator = 'smart',
+                            },
+                        },
+                    },
+                },
+            }
+
+            vim.lsp.enable({ 'lua_ls', 'tsc', 'terraformls' })
+
+            vim.keymap.set('n', 'K', hover.open)
+            vim.keymap.set('n', 'gd', lsp_split_to(vim.lsp.buf.definition))
+            vim.keymap.set('n', 'gr', vim.lsp.buf.references)
         end,
     },
 
     {
         'pmizio/typescript-tools.nvim',
+        enabled = false,
         dependencies = {
             'nvim-lua/plenary.nvim',
-            'neovim/nvim-lspconfig',
-            'dmmulroy/ts-error-translator.nvim',
             'utils',
             {
                 'saghen/blink.cmp',
@@ -63,37 +136,8 @@ return {
                 priority = 1000,
             },
         },
-        ft = { 'astro', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
-        ---@module 'lspconfig'
-        ---@type lspconfig.Config
-        ---@diagnostic disable-next-line:missing-fields
+        ft = { 'astro', 'javascript', 'javascriptreact', 'typescript', 'tsx', 'vue' },
         opts = {
-            -- Should always be the same as spec `ft`
-            filetypes = { 'astro', 'javascript', 'javascriptreact', 'typescript', 'typescriptreact', 'vue' },
-            root_dir = function(_, bufnr)
-                return require('utils').root_dir(bufnr)
-            end,
-            handlers = {
-                ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
-                    if result.diagnostics == nil then return end
-
-                    require('ts-error-translator').translate_diagnostics(err, result, ctx)
-
-                    -- codes: https://github.com/microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json
-                    local filter = require('typescript-tools.api').filter_diagnostics({ 80001 })
-                    filter(err, result, ctx, config)
-                end,
-            },
-            on_attach = function(client)
-                -- Use conform.nvim
-                client.server_capabilities.documentFormattingProvider = false
-                client.server_capabilities.documentRangeFormattingProvider = false
-
-                local api = require('typescript-tools.api')
-
-                vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
-                vim.keymap.set('n', 'gr', api.file_references)
-            end,
             ---@type Settings
             ---@diagnostic disable-next-line:missing-fields
             settings = {
@@ -113,9 +157,57 @@ return {
                 },
                 jsx_close_tag = {
                     enable = true,
-                    filetypes = { 'typescriptreact' },
+                    filetypes = { 'tsx' },
                 },
             },
+        },
+        config = function(_, opts)
+            local plugin_config = require('typescript-tools.config')
+
+            vim.lsp.config[plugin_config.plugin_name] = {
+                cmd = function(...)
+                    return require('typescript-tools.rpc').start(...)
+                end,
+                -- Should always be the same as spec `ft`
+                filetypes = { 'astro', 'javascript', 'javascriptreact', 'typescript', 'tsx', 'vue' },
+                root_markers = {
+                    { '.repo-root', 'yarn.lock' },
+                    {'tsconfig.json', 'package.json' },
+                    '.git',
+                },
+                handlers = {
+                    ['textDocument/publishDiagnostics'] = function(err, result, ctx, config)
+                        if result.diagnostics == nil then return end
+
+                        -- codes: https://github.com/microsoft/TypeScript/blob/main/src/compiler/diagnosticMessages.json
+                        local filter = require('typescript-tools.api').filter_diagnostics({ 80001 })
+                        filter(err, result, ctx, config)
+                    end,
+                },
+                on_attach = function(client)
+                    -- Use conform.nvim
+                    client.server_capabilities.documentFormattingProvider = false
+                    client.server_capabilities.documentRangeFormattingProvider = false
+
+                    local api = require('typescript-tools.api')
+
+                    vim.keymap.set('n', 'gd', lsp_split_to(api.go_to_source_definition))
+                    vim.keymap.set('n', 'gr', api.file_references)
+                end,
+            }
+
+            require('typescript-tools').setup(opts)
+        end,
+    },
+
+    {
+        'dmmulroy/ts-error-translator.nvim',
+        event = 'VeryLazy',
+        ft = { 'astro', 'javascript', 'javascriptreact', 'typescript', 'tsx', 'vue' },
+        opts = {
+            auto_attach = true,
+            -- servers = { 'typescript-tools' },
+            servers = { 'tsgo' },
         },
     },
 
@@ -127,8 +219,9 @@ return {
         ---@field cwd string
 
         ---@class lint.CustomLinter: lint.Linter
-        ---@field cmd string | fun(bufnr: integer, ctx: lint.CmdContext):string Command to executre
-        ---@field cwd string | fun(bufnr: integer):string? Current working directory
+        ---@field cmd? string | fun(bufnr: integer, ctx: lint.CmdContext):string Command to executre
+        ---@field args? string[] | fun(bufnr: integer, ctx: lint.CmdContext): string[] command arguments
+        ---@field cwd? string | fun(bufnr: integer):string? Current working directory
         ---@field name string? Name of the linter (define if not existing)
         ---@field parser lint.Parser? Parse function for a linter
 
@@ -139,7 +232,6 @@ return {
         opts = {
             events = { 'BufWritePost', 'InsertLeave' },
             linters_by_ft = {
-                typescript = { 'eslint' },
                 typescriptreact = { 'eslint' },
             },
             linters = {
@@ -150,6 +242,18 @@ return {
                     end,
                     cwd = function(bufnr)
                         return require('utils').root_dir(bufnr)
+                    end,
+                },
+                oxlint = {
+                    cmd = function(_, ctx)
+                        local local_binary = vim.fn.fnamemodify(ctx.cwd .. '/node_modules/.bin/oxlint', ':p')
+                        return vim.uv.fs_stat(local_binary) and local_binary or 'eslint'
+                    end,
+                    cwd = function(bufnr)
+                        return require('utils').root_dir(bufnr)
+                    end,
+                    args = function(bufnr, ctx)
+                        return { '--format', 'github', vim.fs.relpath(ctx.cwd, vim.api.nvim_buf_get_name(bufnr)) }
                     end,
                 },
             },
@@ -184,6 +288,11 @@ return {
 
                         local ctx = { cwd = linter.cwd or vim.fn.getcwd() }
 
+                        -- Allow `args` to take a function
+                        if type(linter.args) == 'function' then
+                            linter.args = linter.args(event.buf, ctx)
+                        end
+
                         -- Pass context to `cmd`
                         if type(linter.cmd) == 'function' then
                             linter.cmd = linter.cmd(event.buf, ctx)
@@ -209,7 +318,7 @@ return {
                 json = { 'prettier' },
                 svg = { 'svgo' },
                 typescript = { 'prettier' },
-                typescriptreact = { 'prettier' },
+                tsx = { 'prettier' },
             },
             format_after_save = {
                 lsp_fallback = 'fallback',
@@ -219,12 +328,16 @@ return {
                     command = 'svgo',
                     args = { '-i', '-', '-o', '-' },
                     stdin = true,
-                    -- cwd = require('conform.util').root_file({ 'package.json' }),
-                    -- condition = function(self, ctx)
-                    --     local buf_lang = vim.bo[ctx.buf].filetype
-                    --     return buf_lang == 'svg'
-                    -- end,
                 },
+                prettier = function(bufnr)
+                    return {
+                        command = require('conform.util').find_executable({ 'node_modules/.bin/prettier' }, 'prettier'),
+                        cwd = function()
+                            return require('utils').root_dir(bufnr)
+                        end,
+                        require_cwd = true,
+                    }
+                end,
             },
         },
     },
@@ -242,29 +355,5 @@ return {
                 { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
             },
         },
-        ---@overload fun(plugin: LazyPlugin, opts: lazydev.Config)
-        config = function(_, opts)
-            require('lazydev').setup(opts)
-
-            vim.lsp.config('lua_ls', {
-                settings = {
-                    Lua = {
-                        format = {
-                            enable = true,
-                            defaultConfig = {
-                                indent_style = 'space',
-                                indent_size = '4',
-                                quote_style = 'single',
-                                trailing_table_separator = 'smart',
-                            },
-                        },
-                    },
-                },
-            })
-
-            vim.lsp.enable({ 'lua_ls' })
-
-            vim.keymap.set('n', 'gd', lsp_split_to(vim.lsp.buf.definition))
-        end,
     },
 }

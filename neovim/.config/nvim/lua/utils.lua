@@ -36,6 +36,7 @@ end
 function M.root_dir(bufnr)
     -- Opinionated priorities
     return M.root_dir_from_pattern(bufnr, {
+        '.repo-root',
         'yarn.lock',
         'tsconfig.json',
         'package.json',

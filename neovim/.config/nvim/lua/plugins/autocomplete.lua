@@ -3,6 +3,7 @@
 return {
     {
         'saghen/blink.cmp',
+        version = 'v1.10.2',
         dependencies = {
             'echasnovski/mini.icons',
             'rafamadriz/friendly-snippets',
@@ -60,7 +61,7 @@ return {
                 },
                 completion = { menu = { auto_show = true } },
             },
-            fuzzy = { implementation = 'prefer_rust_with_warning' },
+            fuzzy = { implementation = 'rust' },
             sources = {
                 per_filetype = {
                     lua = { inherit_defaults = true, 'lazydev' },
